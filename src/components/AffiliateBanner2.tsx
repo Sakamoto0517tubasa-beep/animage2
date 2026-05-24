@@ -1,22 +1,19 @@
-import AffiliateBanner from "@/components/AffiliateBanner";
+import AffiliateTextLink from "@/components/AffiliateTextLink";
 
 const AFFILIATE_LINK =
-  "https://px.a8.net/svt/ejp?a8mat=4B3Y3B%205LTYUQ%2041A0%2061RIA";
+  "https://px.a8.net/svt/ejp?a8mat=4B3Y3B+5LTYUQ+41A0+61RIA";
 
-const BANNER_IMAGE =
-  "https://www20.a8.net/svt/bgt?aid=&wid=&eno=01&mid=&mc=1";
+const LINK_LABEL = "日本で働くなら登録無料の求人サービスへ";
 
 const TRACKING_PIXEL =
-  "https://www10.a8.net/0.gif?a8mat=4B3Y3B%205LTYUQ%2041A0%2061RIA";
+  "https://www12.a8.net/0.gif?a8mat=4B3Y3B+5LTYUQ+41A0+61RIA";
 
 export default function AffiliateBanner2() {
   return (
-    <AffiliateBanner
+    <AffiliateTextLink
       href={AFFILIATE_LINK}
-      imageSrc={BANNER_IMAGE}
+      label={LINK_LABEL}
       trackingPixel={TRACKING_PIXEL}
-      imageWidth={300}
-      imageHeight={250}
     />
   );
 }
