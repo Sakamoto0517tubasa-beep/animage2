@@ -1,5 +1,6 @@
 import HeroSection from "@/components/HeroSection";
 import PageContainer from "@/components/PageContainer";
+import RakutenAffiliateBanner from "@/components/RakutenAffiliateBanner";
 import SimulationForm from "@/components/SimulationForm";
 
 export default function HomePage() {
@@ -7,6 +8,10 @@ export default function HomePage() {
     <>
       <HeroSection />
       <PageContainer>
+        <div className="my-10 sm:my-14">
+          <RakutenAffiliateBanner />
+        </div>
+
         <div className="mb-12">
           <h2 className="section-title">あなたの条件を入力してください</h2>
           <div className="gold-accent-line" />
@@ -17,6 +22,10 @@ export default function HomePage() {
 
         <div className="glass-card p-8 sm:p-10">
           <SimulationForm />
+        </div>
+
+        <div className="my-10 sm:my-14">
+          <RakutenAffiliateBanner />
         </div>
       </PageContainer>
     </>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AffiliateBanner1 from "@/components/AffiliateBanner1";
 import PageContainer from "@/components/PageContainer";
 import RegionTable from "@/components/RegionTable";
 
@@ -15,6 +16,8 @@ export default function ComparePage() {
         </div>
 
         <RegionTable />
+
+        <AffiliateBanner1 />
 
         <Link
           href="/"

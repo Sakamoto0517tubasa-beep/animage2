@@ -1,6 +1,8 @@
 import Link from "next/link";
 import JobTypeIcon from "@/components/JobTypeIcon";
+import AffiliateBanner2 from "@/components/AffiliateBanner2";
 import PageContainer from "@/components/PageContainer";
+import RakutenAffiliateBanner from "@/components/RakutenAffiliateBanner";
 import RegionBanner from "@/components/RegionBanner";
 import ResultBreakdown from "@/components/ResultBreakdown";
 import {
@@ -70,6 +72,8 @@ export default async function ResultPage({
 
         <ResultBreakdown result={result} />
 
+        <RakutenAffiliateBanner />
+
         <div className="glass-card px-8 py-8 sm:px-10">
           <h2 className="section-heading mb-3">必要な日本語レベル</h2>
           <p className="stat-value-sm">{result.requiredJapanese}</p>
@@ -91,6 +95,8 @@ export default async function ResultPage({
             </p>
           )}
         </div>
+
+        <AffiliateBanner2 />
 
         <div className="glass-card px-8 py-8 sm:px-10">
           <h2 className="section-heading mb-3">休日の過ごし方</h2>
