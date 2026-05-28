@@ -1,10 +1,13 @@
 import Link from "next/link";
 import JobTypeIcon from "@/components/JobTypeIcon";
 import AffiliateBanner2 from "@/components/AffiliateBanner2";
+import JobDetails from "@/components/JobDetails";
 import PageContainer from "@/components/PageContainer";
 import RakutenAffiliateBanner from "@/components/RakutenAffiliateBanner";
 import RegionBanner from "@/components/RegionBanner";
+import RegionDetails from "@/components/RegionDetails";
 import ResultBreakdown from "@/components/ResultBreakdown";
+import VisaRouteDetails from "@/components/VisaRouteDetails";
 import {
   calculateSimulation,
   parseSimulationInput,
@@ -13,16 +16,26 @@ import {
 type SearchParams = {
   nationality?: string;
   age?: string;
+  gender?: string;
   education?: string;
   japaneseLevel?: string;
+  japaneseStudyHistory?: string;
   jobType?: string;
+  workExperience?: string;
+  qualifications?: string;
+  pcSkill?: string;
+  prefecture?: string;
   region?: string;
   desiredSalary?: string;
   savings?: string;
-  workYears?: string;
+  communicationPreference?: string;
+  familyComposition?: string;
   familyStatus?: string;
   housing?: string;
   lifestyle?: string;
+  carNeed?: string;
+  workYears?: string;
+  purpose?: string;
 };
 
 export default async function ResultPage({
@@ -58,16 +71,20 @@ export default async function ResultPage({
             <JobTypeIcon jobType={input.jobType} />
             <div>
               <h1 className="section-title">
-                あなたが{input.region}の{input.jobType}で働いた場合
+                あなたが{input.prefecture}の{input.jobType}で働いた場合
               </h1>
               <div className="gold-accent-line" />
               <p className="section-subtitle">
-                {input.nationality}・{input.age}歳・日本語{input.japaneseLevel}
-                ・{input.familyStatus}・{input.housing}・{input.lifestyle}
+                {input.nationality}・{input.age}歳・{input.gender}・日本語
+                {input.japaneseLevel}・{input.familyComposition}・{input.housing}
+                ・{input.lifestyle}・目的：{input.purpose}
               </p>
             </div>
           </div>
-          <RegionBanner region={input.region} />
+          <RegionBanner
+            calcRegion={result.calcRegion}
+            prefecture={input.prefecture}
+          />
         </div>
 
         <ResultBreakdown result={result} />
@@ -79,29 +96,18 @@ export default async function ResultPage({
           <p className="stat-value-sm">{result.requiredJapanese}</p>
         </div>
 
-        <div className="glass-card px-8 py-8 sm:px-10">
-          <h2 className="section-heading mb-4">向いている来日ルート</h2>
-          {result.visaRoutes.length > 0 ? (
-            <ul className="flex flex-wrap gap-3">
-              {result.visaRoutes.map((route) => (
-                <li key={route} className="tag-gold">
-                  {route}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-navy-muted">
-              該当するルートが見つかりませんでした。条件を見直してください。
-            </p>
-          )}
-        </div>
+        <VisaRouteDetails routes={result.visaRoutes} />
+
+        <RegionDetails detail={result.prefectureDetail} />
+
+        <JobDetails detail={result.jobDetail} jobType={input.jobType} />
 
         <AffiliateBanner2 />
 
         <div className="glass-card px-8 py-8 sm:px-10">
           <h2 className="section-heading mb-3">休日の過ごし方</h2>
           <p className="leading-relaxed text-navy-muted">
-            {input.region}のおすすめスポット:{" "}
+            {input.prefecture}のおすすめスポット:{" "}
             <span className="font-medium text-navy">{result.spots}</span>
           </p>
         </div>

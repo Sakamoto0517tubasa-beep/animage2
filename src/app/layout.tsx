@@ -3,8 +3,8 @@ import Header from "@/components/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "日本移住・就労シミュレーター",
-  description: "日本での就労・生活をシミュレーションするツール",
+  title: "MUSUBI",
+  description: "外国人のための相談・サポート",
   verification: {
     google: "eaCm7o9NZQHZ0d14ePYDAC-3CwZ8Od0ZePqoR28ht5s",
   },

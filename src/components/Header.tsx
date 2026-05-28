@@ -1,14 +1,12 @@
 import Link from "next/link";
+import SiteLogo from "@/components/SiteLogo";
 
 export default function Header() {
   return (
     <header className="relative bg-navy-deep/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
-        <Link
-          href="/"
-          className="text-base font-bold tracking-wide text-white sm:text-lg"
-        >
-          日本移住・就労シミュレーター
+        <Link href="/" className="flex items-center">
+          <SiteLogo />
         </Link>
         <nav className="flex gap-6 text-sm font-medium tracking-wide">
           <Link

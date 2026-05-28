@@ -76,25 +76,88 @@ export type Savings =
 
 export type WorkYears = "1年" | "3年" | "5年" | "10年以上";
 
-export type FamilyStatus = "単身" | "家族帯同";
+export type Gender = "男性" | "女性" | "回答しない";
 
-export type HousingPreference = "会社寮" | "自分で探す";
+export type JapaneseStudyHistory =
+  | "なし"
+  | "6ヶ月未満"
+  | "6ヶ月〜1年"
+  | "1〜2年"
+  | "2年以上";
 
-export type Lifestyle = "節約重視" | "普通" | "充実重視";
+export type WorkExperience =
+  | "なし"
+  | "1年未満"
+  | "1〜3年"
+  | "3〜5年"
+  | "5年以上";
+
+export type Qualification =
+  | "普通自動車免許"
+  | "大型自動車免許"
+  | "フォークリフト免許"
+  | "介護福祉士"
+  | "調理師免許"
+  | "溶接技能者"
+  | "電気工事士"
+  | "ITパスポート"
+  | "基本情報技術者"
+  | "英語（TOEIC 600点以上）"
+  | "特になし";
+
+export type PcSkill =
+  | "なし"
+  | "基本操作"
+  | "Excel/Word"
+  | "プログラミング可";
+
+export type CommunicationPreference =
+  | "格安SIM約0.3万円"
+  | "大手キャリア約0.8万円";
+
+export type FamilyComposition =
+  | "単身"
+  | "配偶者のみ"
+  | "子供1人"
+  | "子供2人以上";
+
+export type HousingPreference =
+  | "会社寮"
+  | "シェアハウス"
+  | "自分で賃貸を探す";
+
+export type Lifestyle = "節約重視" | "バランス" | "充実重視";
+
+export type CarNeed = "不要" | "中古車購入予定" | "新車購入予定";
+
+export type Purpose =
+  | "稼いで母国に送金"
+  | "日本に定住"
+  | "スキルアップ"
+  | "日本語習得"
+  | "その他";
 
 export type SimulationInput = {
   nationality: Nationality;
   age: number;
+  gender: Gender;
   education: Education;
   japaneseLevel: JapaneseLevel;
+  japaneseStudyHistory: JapaneseStudyHistory;
   jobType: JobType;
-  region: Region;
+  workExperience: WorkExperience;
+  qualifications: Qualification[];
+  pcSkill: PcSkill;
+  prefecture: import("./prefectureData").Prefecture;
   desiredSalary: number;
   savings: Savings;
-  workYears: WorkYears;
-  familyStatus: FamilyStatus;
+  communicationPreference: CommunicationPreference;
+  familyComposition: FamilyComposition;
   housing: HousingPreference;
   lifestyle: Lifestyle;
+  carNeed: CarNeed;
+  workYears: WorkYears;
+  purpose: Purpose;
 };
 
 export const jobTypeGroups: { label: string; jobs: JobType[] }[] = [
@@ -277,7 +340,7 @@ const traineeJobs: JobType[] = [
   "林業",
 ];
 
-const employeeInsuranceJobs: JobType[] = [
+export const employeeInsuranceJobs: JobType[] = [
   "外食・飲食店",
   "ITエンジニア",
   "Web制作",
@@ -295,7 +358,7 @@ const employeeInsuranceJobs: JobType[] = [
   "医療（病院事務）",
 ];
 
-const jobRentModifier: Record<JobType, number> = {
+export const jobRentModifier: Record<JobType, number> = {
   介護: 1.0,
   "医療（病院事務）": 1.05,
   看護助手: 1.0,
@@ -521,198 +584,12 @@ export function isValidJobType(value: string): value is JobType {
   return allJobTypes.includes(value as JobType);
 }
 
-export function getVisaRoutes(
-  japaneseLevel: JapaneseLevel,
-  education: Education,
-  jobType: JobType
-): string[] {
-  const routes: string[] = [];
-
-  if (
-    ["N4", "N3", "N2", "N1"].includes(japaneseLevel) &&
-    ["高校", "専門学校", "大学", "大学院"].includes(education)
-  ) {
-    routes.push("特定技能");
-  }
-  if (["なし", "N5", "N4"].includes(japaneseLevel)) {
-    routes.push("日本語学校経由");
-  }
-  if (["専門学校", "大学", "大学院"].includes(education)) {
-    routes.push("専門学校経由");
-  }
-  if (traineeJobs.includes(jobType)) {
-    routes.push("技能実習");
-  }
-
-  return routes;
-}
-
-function round(value: number): number {
-  return Math.round(value * 10) / 10;
-}
-
-function workYearsToNumber(workYears: WorkYears): number {
-  const map: Record<WorkYears, number> = {
-    "1年": 1,
-    "3年": 3,
-    "5年": 5,
-    "10年以上": 10,
-  };
-  return map[workYears];
-}
-
-export function calculateSimulation(input: SimulationInput) {
-  const region = regionData[input.region];
-  const baseSalary = jobSalaryData[input.jobType][input.region];
-  const overtime = round(baseSalary * 0.12);
-  const grossMonthly = round(baseSalary + overtime);
-
-  const takeHomeRate =
-    baseSalary >= 30
-      ? 0.75
-      : input.familyStatus === "家族帯同"
-        ? 0.77
-        : 0.78;
-  const takeHome = round(grossMonthly * takeHomeRate);
-
-  let rent = region.rent * jobRentModifier[input.jobType];
-  let rentNote = "自分で借りる場合の目安";
-
-  if (input.housing === "会社寮" && dormAvailableJobs.includes(input.jobType)) {
-    rent = round(rent * 0.5);
-    rentNote = "会社寮利用（通常家賃の半額）";
-  } else if (input.housing === "会社寮") {
-    rentNote = "この職種は会社寮が少ないため、一般家賃で計算";
-  }
-
-  if (input.familyStatus === "家族帯同") rent = round(rent * 1.6);
-  if (input.lifestyle === "充実重視" && input.housing === "自分で探す") {
-    rent = round(rent * 1.1);
-  }
-  if (input.lifestyle === "節約重視" && input.housing === "自分で探す") {
-    rent = round(rent * 0.9);
-  }
-
-  const lifestyleFoodMult: Record<Lifestyle, number> = {
-    節約重視: 0.85,
-    普通: 1.0,
-    充実重視: 1.2,
-  };
-  const familyFoodMult = input.familyStatus === "家族帯同" ? 1.7 : 1.0;
-  const foodMult = lifestyleFoodMult[input.lifestyle] * familyFoodMult;
-
-  const foodSelfCook = round(region.food * 0.75 * foodMult);
-  const foodEatingOut = round(region.food * 1.35 * foodMult);
-  const foodActive =
-    input.lifestyle === "節約重視"
-      ? foodSelfCook
-      : input.lifestyle === "充実重視"
-        ? foodEatingOut
-        : round((foodSelfCook + foodEatingOut) / 2);
-
-  const communicationBudget = 0.3;
-  const communicationMajor = 0.8;
-  const communicationActive =
-    input.lifestyle === "節約重視"
-      ? communicationBudget
-      : input.lifestyle === "充実重視"
-        ? communicationMajor
-        : 0.5;
-
-  const transport = round(
-    region.transport + (input.familyStatus === "家族帯同" ? 0.3 : 0)
-  );
-
-  const utilityFamilyMult = input.familyStatus === "家族帯同" ? 1.3 : 1.0;
-  const utilitiesSummerWinter = round(1.0 * utilityFamilyMult);
-  const utilitiesSpringFall = round(0.6 * utilityFamilyMult);
-  const utilitiesAverage = round(
-    (utilitiesSummerWinter + utilitiesSpringFall) / 2
-  );
-
-  const lifestyleDailyMult: Record<Lifestyle, number> = {
-    節約重視: 0.8,
-    普通: 1.0,
-    充実重視: 1.3,
-  };
-  const dailyGoods = round(
-    0.5 *
-      (input.familyStatus === "家族帯同" ? 1.4 : 1.0) *
-      lifestyleDailyMult[input.lifestyle]
-  );
-
-  const healthInsuranceEstimate = round(
-    employeeInsuranceJobs.includes(input.jobType) ? 0 : 1.5
-  );
-  const healthInsuranceNote =
-    healthInsuranceEstimate === 0
-      ? "社会保険加入想定（手取りに反映済み）"
-      : "未加入の場合の自己負担目安";
-
-  const totalExpenses = round(
-    rent +
-      foodActive +
-      communicationActive +
-      transport +
-      utilitiesAverage +
-      dailyGoods +
-      healthInsuranceEstimate
-  );
-
-  const monthlySavings = round(takeHome - totalExpenses);
-  const workYearsNum = workYearsToNumber(input.workYears);
-  const savingsOneYear = round(monthlySavings * 12);
-  const savingsTargetYears = round(monthlySavings * 12 * workYearsNum);
-  const remittanceRate = input.familyStatus === "家族帯同" ? 0.5 : 0.3;
-  const remittanceAmount =
-    monthlySavings > 0 ? round(monthlySavings * remittanceRate) : 0;
-
-  const requiredJapanese = jobJapaneseLevel[input.jobType];
-  const visaRoutes = getVisaRoutes(
-    input.japaneseLevel,
-    input.education,
-    input.jobType
-  );
-
-  return {
-    income: {
-      baseSalary,
-      overtime,
-      grossMonthly,
-      takeHomeRate,
-      takeHome,
-    },
-    expenses: {
-      rent,
-      rentNote,
-      foodSelfCook,
-      foodEatingOut,
-      foodActive,
-      communicationBudget,
-      communicationMajor,
-      communicationActive,
-      transport,
-      utilitiesSummerWinter,
-      utilitiesSpringFall,
-      utilitiesAverage,
-      dailyGoods,
-      healthInsuranceEstimate,
-      healthInsuranceNote,
-      totalExpenses,
-    },
-    savings: {
-      monthlySavings,
-      savingsOneYear,
-      savingsTargetYears,
-      workYearsNum,
-      remittanceAmount,
-      remittanceRate,
-    },
-    requiredJapanese,
-    visaRoutes,
-    spots: region.spots,
-  };
-}
+export { calculateSimulation } from "./simulationCalc";
+export { prefectures } from "./prefectureData";
+export type { Prefecture } from "./prefectureData";
+export { getJobDetail } from "./jobDetailData";
+export type { JobDetail } from "./jobDetailData";
+export type { VisaRouteDetail } from "./visaRouteData";
 
 export function formatManYen(value: number): string {
   const prefix = value < 0 ? "-" : "";
@@ -723,30 +600,50 @@ export function formatManYen(value: number): string {
 export function parseSimulationInput(params: {
   nationality?: string;
   age?: string;
+  gender?: string;
   education?: string;
   japaneseLevel?: string;
+  japaneseStudyHistory?: string;
   jobType?: string;
+  workExperience?: string;
+  qualifications?: string;
+  pcSkill?: string;
+  prefecture?: string;
   region?: string;
   desiredSalary?: string;
   savings?: string;
-  workYears?: string;
+  communicationPreference?: string;
+  familyComposition?: string;
   familyStatus?: string;
   housing?: string;
   lifestyle?: string;
+  carNeed?: string;
+  workYears?: string;
+  purpose?: string;
 }): SimulationInput | null {
   const {
     nationality,
     age,
+    gender,
     education,
     japaneseLevel,
+    japaneseStudyHistory,
     jobType,
+    workExperience,
+    qualifications,
+    pcSkill,
+    prefecture,
     region,
     desiredSalary,
     savings,
-    workYears,
+    communicationPreference,
+    familyComposition,
     familyStatus,
     housing,
     lifestyle,
+    carNeed,
+    workYears,
+    purpose,
   } = params;
 
   if (
@@ -755,7 +652,6 @@ export function parseSimulationInput(params: {
     !education ||
     !japaneseLevel ||
     !jobType ||
-    !region ||
     !desiredSalary ||
     !savings ||
     !workYears
@@ -774,18 +670,54 @@ export function parseSimulationInput(params: {
     return null;
   }
 
+  const regionToPrefecture: Record<string, import("./prefectureData").Prefecture> = {
+    東京: "東京都",
+    神奈川: "神奈川県",
+    長野: "長野県",
+    福岡: "福岡県",
+    北海道: "北海道",
+  };
+
+  const resolvedPrefecture =
+    (prefecture as import("./prefectureData").Prefecture) ||
+    (region ? regionToPrefecture[region] : undefined) ||
+    "東京都";
+
+  const qualList = qualifications
+    ? (qualifications.split(",").filter(Boolean) as Qualification[])
+    : (["特になし"] as Qualification[]);
+
+  const legacyFamily =
+    familyStatus === "家族帯同" ? "配偶者のみ" : "単身";
+  const legacyHousing =
+    housing === "自分で探す" ? "自分で賃貸を探す" : housing;
+  const legacyLifestyle =
+    lifestyle === "普通" ? "バランス" : lifestyle;
+
   return {
     nationality: nationality as Nationality,
     age: parsedAge,
+    gender: (gender as Gender) || "回答しない",
     education: education as Education,
     japaneseLevel: japaneseLevel as JapaneseLevel,
+    japaneseStudyHistory:
+      (japaneseStudyHistory as JapaneseStudyHistory) || "なし",
     jobType,
-    region: region as Region,
+    workExperience: (workExperience as WorkExperience) || "なし",
+    qualifications: qualList.length > 0 ? qualList : ["特になし"],
+    pcSkill: (pcSkill as PcSkill) || "基本操作",
+    prefecture: resolvedPrefecture,
     desiredSalary: parsedSalary,
     savings: savings as Savings,
+    communicationPreference:
+      (communicationPreference as CommunicationPreference) ||
+      "格安SIM約0.3万円",
+    familyComposition:
+      (familyComposition as FamilyComposition) || legacyFamily,
+    housing: (legacyHousing as HousingPreference) || "自分で賃貸を探す",
+    lifestyle: (legacyLifestyle as Lifestyle) || "バランス",
+    carNeed: (carNeed as CarNeed) || "不要",
     workYears: workYears as WorkYears,
-    familyStatus: (familyStatus as FamilyStatus) || "単身",
-    housing: (housing as HousingPreference) || "自分で探す",
-    lifestyle: (lifestyle as Lifestyle) || "普通",
+    purpose: (purpose as Purpose) || "スキルアップ",
   };
 }

@@ -1,16 +1,19 @@
 import { formatManYen } from "@/data/simulationData";
-import type { calculateSimulation } from "@/data/simulationData";
+import type { calculateSimulation } from "@/data/simulationCalc";
 
 type SimulationResult = ReturnType<typeof calculateSimulation>;
 
-type FinancialRowProps = {
+function Row({
+  label,
+  value,
+  note,
+  large,
+}: {
   label: string;
   value: string;
   note?: string;
   large?: boolean;
-};
-
-function FinancialRow({ label, value, note, large }: FinancialRowProps) {
+}) {
   return (
     <div className="flex items-start justify-between gap-4 py-3">
       <div className="min-w-0 flex-1">
@@ -24,118 +27,64 @@ function FinancialRow({ label, value, note, large }: FinancialRowProps) {
   );
 }
 
-type ResultBreakdownProps = {
-  result: SimulationResult;
-};
-
-export default function ResultBreakdown({ result }: ResultBreakdownProps) {
+export default function ResultBreakdown({ result }: { result: SimulationResult }) {
   const { income, expenses, savings } = result;
-  const takeHomePercent = Math.round(income.takeHomeRate * 100);
 
   return (
     <div className="glass-card overflow-hidden">
-      {/* 収入 */}
       <div className="px-8 py-8 sm:px-10">
-        <h2 className="section-heading mb-6">収入</h2>
-        <FinancialRow
-          label="月収目安（基本給）"
-          value={`約${formatManYen(income.baseSalary)}`}
-        />
-        <FinancialRow
-          label="残業代目安"
-          value={`約${formatManYen(income.overtime)}`}
-          note="月20時間の残業を想定"
-        />
+        <h2 className="section-heading mb-6">収入シミュレーション</h2>
+        <Row label="基本給（月収）" value={`約${formatManYen(income.baseSalary)}`} />
+        <Row label="残業代" value={`約${formatManYen(income.overtime)}`} note="月20時間・時給×1.25×20時間" />
+        <Row label="交通費支給（会社負担）" value={`約${formatManYen(income.commuteAllowance)}`} note="月1〜3万円の目安" />
+        <Row label="総支給額" value={`約${formatManYen(income.grossMonthly)}`} note="基本給＋残業代" large />
+        <Row label="健康保険（4.99%）" value={`約${formatManYen(income.healthIns)}`} />
+        <Row label="厚生年金（9.15%）" value={`約${formatManYen(income.pension)}`} />
+        <Row label="雇用保険（0.6%）" value={`約${formatManYen(income.employmentIns)}`} />
+        <Row label="社会保険料合計" value={`約${formatManYen(income.socialInsurance)}`} note="約14.7%" />
+        <Row label="所得税" value={`約${formatManYen(income.incomeTax)}`} note="課税所得に応じて5〜20%" />
+        <Row label="住民税" value={`約${formatManYen(income.residentTax)}`} note="初年度は0円" />
         <div className="mt-4 border-t border-navy/8 pt-6">
           <p className="financial-label mb-2">手取り月収</p>
           <p className="stat-value">約{formatManYen(income.takeHome)}</p>
-          <p className="financial-note mt-2">
-            社会保険・税金引後（総支給の約{takeHomePercent}%）
-          </p>
         </div>
       </div>
 
-      {/* 支出 */}
       <div className="px-8 py-8 sm:px-10">
-        <h2 className="section-heading mb-6">支出の詳細</h2>
-        <FinancialRow
-          label="家賃"
-          value={`約${formatManYen(expenses.rent)}`}
-          note={expenses.rentNote}
-        />
-        <FinancialRow
-          label="食費（自炊想定）"
-          value={`約${formatManYen(expenses.foodSelfCook)}`}
-        />
-        <FinancialRow
-          label="食費（外食多め）"
-          value={`約${formatManYen(expenses.foodEatingOut)}`}
-        />
-        <FinancialRow
-          label="通信費（格安SIM）"
-          value={`約${formatManYen(expenses.communicationBudget)}`}
-        />
-        <FinancialRow
-          label="通信費（大手キャリア）"
-          value={`約${formatManYen(expenses.communicationMajor)}`}
-        />
-        <FinancialRow
-          label="交通費"
-          value={`約${formatManYen(expenses.transport)}`}
-          note="通勤定期代"
-        />
-        <FinancialRow
-          label="光熱費（夏・冬）"
-          value={`約${formatManYen(expenses.utilitiesSummerWinter)}`}
-        />
-        <FinancialRow
-          label="光熱費（春・秋）"
-          value={`約${formatManYen(expenses.utilitiesSpringFall)}`}
-        />
-        <FinancialRow
-          label="日用品・雑費"
-          value={`約${formatManYen(expenses.dailyGoods)}`}
-        />
-        <FinancialRow
+        <h2 className="section-heading mb-6">支出シミュレーション（詳細）</h2>
+        <Row label="家賃" value={`約${formatManYen(expenses.rent)}`} note={expenses.rentNote} />
+        <Row label="食費" value={`約${formatManYen(expenses.food)}`} />
+        <Row label="光熱費（電気・ガス・水道）" value={`約${formatManYen(expenses.utilities)}`} />
+        <Row label="通信費" value={`約${formatManYen(expenses.communication)}`} />
+        <Row label="交通費（通勤）" value={`約${formatManYen(expenses.transport)}`} />
+        <Row label="車関連費用" value={`約${formatManYen(expenses.car)}`} />
+        <Row label="日用品・雑費" value={`約${formatManYen(expenses.dailyGoods)}`} />
+        <Row label="娯楽・交際費" value={`約${formatManYen(expenses.entertainment)}`} />
+        <Row label="家族追加費用" value={`約${formatManYen(expenses.familyCost)}`} />
+        <Row
           label="国民健康保険"
-          value={
-            expenses.healthInsuranceEstimate === 0
-              ? "加入済み"
-              : `約${formatManYen(expenses.healthInsuranceEstimate)}`
-          }
+          value={expenses.healthInsuranceEstimate === 0 ? "加入済み" : `約${formatManYen(expenses.healthInsuranceEstimate)}`}
           note={expenses.healthInsuranceNote}
         />
         <div className="mt-4 border-t border-navy/8 pt-6">
-          <p className="financial-label mb-2">月間支出合計（生活スタイル反映）</p>
+          <p className="financial-label mb-2">月の総支出</p>
           <p className="stat-value">約{formatManYen(expenses.totalExpenses)}</p>
         </div>
       </div>
 
-      {/* 貯金シミュレーション */}
       <div className="bg-navy/5 px-8 py-8 sm:px-10">
-        <h2 className="section-heading mb-6">貯金シミュレーション</h2>
-        <FinancialRow
-          label="月の貯金額"
-          value={`約${formatManYen(savings.monthlySavings)}`}
-          large
-        />
-        <FinancialRow
-          label="1年後の貯金額"
-          value={`約${formatManYen(savings.savingsOneYear)}`}
-          large
-        />
-        <FinancialRow
-          label={`${savings.workYearsNum}年後の貯金額`}
-          value={`約${formatManYen(savings.savingsTargetYears)}`}
-          note="「何年働きたいか」の入力値に基づく"
-          large
-        />
-        <div className="mt-4 border-t border-gold/20 pt-6">
-          <p className="financial-label mb-2">母国への送金可能額目安</p>
-          <p className="stat-value">約{formatManYen(savings.remittanceAmount)}</p>
-          <p className="financial-note mt-2">
-            月の貯金額の約{Math.round(savings.remittanceRate * 100)}%を送金想定
-          </p>
+        <h2 className="section-heading mb-6">手元に残る金額の内訳</h2>
+        <Row label="月の手取り" value={`約${formatManYen(savings.takeHome)}`} large />
+        <Row label="月の総支出" value={`約${formatManYen(savings.totalExpenses)}`} large />
+        <Row label="月の貯金額" value={`約${formatManYen(savings.monthlySavings)}`} large />
+        <Row label="年間貯金額" value={`約${formatManYen(savings.savingsOneYear)}`} large />
+        <Row label="1年後の総資産" value={`約${formatManYen(savings.assetsOneYear)}`} note="現在の貯金＋年間貯金" />
+        <Row label="3年後の総資産" value={`約${formatManYen(savings.assetsThreeYears)}`} />
+        <Row label="5年後の総資産" value={`約${formatManYen(savings.assetsFiveYears)}`} />
+        <Row label="母国への送金可能額" value={`約${formatManYen(savings.remittanceAmount)}`} note="月の貯金の50%と仮定" />
+        <div className="mt-4 rounded-xl bg-gold/10 p-4">
+          <p className="text-sm font-semibold text-navy">目的別アドバイス</p>
+          <p className="mt-2 text-sm leading-relaxed text-navy-muted">{savings.purposeAdvice}</p>
         </div>
       </div>
     </div>
