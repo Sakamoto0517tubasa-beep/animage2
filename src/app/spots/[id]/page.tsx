@@ -85,8 +85,35 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
     ? spot.thumbnail_url
     : null;
 
+  // 構造化データ（観光地スキーマ + 評価）→ 検索結果のリッチ表示
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: spot.location_name,
+    description: `「${spot.anime_title}」の聖地巡礼スポット`,
+    ...(animeImageUrl && { image: animeImageUrl }),
+    ...(spot.address && { address: spot.address }),
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: spot.lat,
+      longitude: spot.lng,
+    },
+    ...(scores.overall != null && reviewCount > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: scores.overall,
+        bestRating: 10,
+        ratingCount: reviewCount,
+      },
+    }),
+  };
+
   return (
     <div className="bg-gray-50 pb-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SpotImagePanel
         animeImageUrl={animeImageUrl}
         streetViewUrl={streetViewUrl}
