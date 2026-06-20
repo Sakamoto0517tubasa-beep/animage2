@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Geist, Playfair_Display } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import MobileShell from "@/components/mobile/MobileShell";
 import PWAProvider from "@/components/PWAProvider";
 import { cn } from "@/lib/utils";
@@ -76,6 +77,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className="min-h-screen bg-gray-100 text-gray-900 antialiased">
         <MobileShell>{children}</MobileShell>
         <PWAProvider />
+        <Analytics />
       </body>
     </html>
   );
