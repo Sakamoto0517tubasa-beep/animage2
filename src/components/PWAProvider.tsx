@@ -56,9 +56,9 @@ export default function PWAProvider() {
   return (
     <div className="fixed bottom-20 left-3 right-3 z-50 mx-auto max-w-lg">
       <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-xl shadow-black/10">
-        <Image src="/icon.svg" alt="AnimAge" width={40} height={40} className="size-10 shrink-0 rounded-xl" />
+        <Image src="/icon.svg" alt="Anigri" width={40} height={40} className="size-10 shrink-0 rounded-xl" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-gray-900">AnimAge をインストール</p>
+          <p className="text-sm font-bold text-gray-900">Anigri をインストール</p>
           <p className="text-xs text-gray-500">ホーム画面に追加して快適に使おう</p>
         </div>
         <button

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AnimAge — アニメ聖地巡礼",
-    short_name: "AnimAge",
+    name: "Anigri — アニメ聖地巡礼",
+    short_name: "Anigri",
     description: "全国のアニメ聖地を探して、訪問した感想をレビュー。",
     start_url: "/",
     display: "standalone",

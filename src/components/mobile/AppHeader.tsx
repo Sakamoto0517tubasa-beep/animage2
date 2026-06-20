@@ -51,7 +51,7 @@ function getHeaderConfig(pathname: string): HeaderConfig | null {
     return { title: "ランキング", backHref: "/" };
   }
 
-  return { title: "AnimAge", backHref: "/" };
+  return { title: "Anigri", backHref: "/" };
 }
 
 export default function AppHeader() {
@@ -73,7 +73,7 @@ export default function AppHeader() {
           </Link>
         )}
 
-        {config.title === "AnimAge" || pathname.startsWith("/auth") ? (
+        {config.title === "Anigri" || pathname.startsWith("/auth") ? (
           <LogoWordmark href="/" className="text-white" />
         ) : (
           <h1 className="text-base font-semibold text-white">{config.title}</h1>

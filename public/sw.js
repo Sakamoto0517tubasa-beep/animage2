@@ -1,5 +1,5 @@
-// AnimAge Service Worker v3
-const CACHE_VERSION = "animage-v3";
+// Anigri Service Worker v3
+const CACHE_VERSION = "anigri-v1";
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const IMAGE_CACHE   = `${CACHE_VERSION}-images`;
 const PAGE_CACHE    = `${CACHE_VERSION}-pages`;

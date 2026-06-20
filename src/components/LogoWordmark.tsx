@@ -20,10 +20,10 @@ export default function LogoWordmark({
   if (href) {
     return (
       <Link href={href} className={classes}>
-        AnimAge
+        Anigri
       </Link>
     );
   }
 
-  return <Tag className={cn(classes, Tag === "h1" && "text-center")}>AnimAge</Tag>;
+  return <Tag className={cn(classes, Tag === "h1" && "text-center")}>Anigri</Tag>;
 }

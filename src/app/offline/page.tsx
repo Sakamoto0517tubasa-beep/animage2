@@ -6,7 +6,7 @@ export default function OfflinePage() {
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center gap-6 px-6 pb-24 text-center">
       <div className="flex size-24 items-center justify-center rounded-full bg-gray-100">
-        <Image src="/icon.svg" alt="AnimAge" width={64} height={64} className="size-16 rounded-2xl" />
+        <Image src="/icon.svg" alt="Anigri" width={64} height={64} className="size-16 rounded-2xl" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-gray-900">オフラインです</h1>
