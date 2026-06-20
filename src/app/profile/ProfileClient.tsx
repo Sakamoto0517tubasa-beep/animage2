@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SpotThumbnail from "@/components/SpotThumbnail";
 import { CheckCircle2, Heart, MapPin, Star, Train } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import { getVisitedIds, toggleVisited } from "@/lib/visited";
@@ -12,6 +12,8 @@ export type FavoriteSpot = {
   id: string;
   location_name: string;
   anime_title: string;
+  lat: number;
+  lng: number;
   thumbnail_url: string | null;
   thumbnail_fallback_url: string | null;
   city: string | null;
@@ -36,20 +38,13 @@ type Tab = "favorites" | "reviews" | "visited";
 
 // ── お気に入りカード ──
 function FavCard({ spot }: { spot: FavoriteSpot }) {
-  const img = spot.thumbnail_fallback_url ?? spot.thumbnail_url;
   return (
     <Link
       href={`/spots/${spot.id}`}
       className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm active:opacity-75"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-        {img ? (
-          <Image src={img} alt={spot.location_name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 200px" />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="size-7 text-gray-300" />
-          </div>
-        )}
+        <SpotThumbnail lat={spot.lat} lng={spot.lng} alt={spot.location_name} fallbackUrl={spot.thumbnail_url} className="object-cover" sizes="(max-width: 640px) 50vw, 200px" />
       </div>
       <div className="p-2.5">
         <p className="truncate text-[10px] font-semibold text-[#E53935]">{spot.anime_title}</p>
@@ -115,7 +110,6 @@ function ReviewCard({ review }: { review: MyReview }) {
 
 // ── 訪問済みカード ──
 function VisitedCard({ spot }: { spot: FavoriteSpot }) {
-  const img = spot.thumbnail_fallback_url ?? spot.thumbnail_url;
 
   function handleUnvisit(e: React.MouseEvent) {
     e.preventDefault();
@@ -129,13 +123,7 @@ function VisitedCard({ spot }: { spot: FavoriteSpot }) {
       className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm active:opacity-75"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-        {img ? (
-          <Image src={img} alt={spot.location_name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 200px" />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="size-7 text-gray-300" />
-          </div>
-        )}
+        <SpotThumbnail lat={spot.lat} lng={spot.lng} alt={spot.location_name} fallbackUrl={spot.thumbnail_url} className="object-cover" sizes="(max-width: 640px) 50vw, 200px" />
         {/* 訪問済みバッジ */}
         <div className="absolute left-1.5 top-1.5 flex items-center gap-0.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[9px] font-bold text-white shadow">
           <CheckCircle2 className="size-2.5" />

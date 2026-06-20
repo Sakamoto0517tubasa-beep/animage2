@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Star, Clock, MapPin, Utensils, Landmark, Coffee } from "lucide-react";
+import { Star, MapPin, Utensils, Landmark, Coffee, Hotel, Navigation, ExternalLink } from "lucide-react";
 import type { NearbyPlace } from "@/app/api/nearby/route";
 
 // ── 距離計算（m） ──
@@ -48,61 +48,101 @@ type Category = { key: string; label: string; icon: React.ReactNode; color: stri
 const CATEGORIES: Category[] = [
   { key: "food",        label: "飲食店",   icon: <Utensils className="size-3.5" />, color: "text-orange-500" },
   { key: "cafe",        label: "カフェ",   icon: <Coffee   className="size-3.5" />, color: "text-amber-600" },
-  { key: "sightseeing", label: "観光スポット", icon: <Landmark className="size-3.5" />, color: "text-blue-500" },
+  { key: "lodging",     label: "宿泊",     icon: <Hotel    className="size-3.5" />, color: "text-rose-500" },
+  { key: "sightseeing", label: "観光",     icon: <Landmark className="size-3.5" />, color: "text-blue-500" },
 ];
 
+// ── 予約・送客リンク（将来ここをアフィリエイトリンクに差し替え）──
+function bookingUrl(place: NearbyPlace, category: string): { href: string; label: string } | null {
+  if (category === "lodging") {
+    // 宿泊 → 楽天トラベルのキーワード検索（※アフィリエイトIDは後で付与）
+    return {
+      href: `https://search.travel.rakuten.co.jp/ds/yado/list?f_keyword=${encodeURIComponent(place.name)}`,
+      label: "宿を予約",
+    };
+  }
+  if (category === "food" || category === "cafe") {
+    // 飲食 → 食べログのキーワード検索（※アフィリエイトIDは後で付与）
+    return {
+      href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(place.name)}`,
+      label: "予約・口コミ",
+    };
+  }
+  return null;
+}
+
 // ── プレイスカード ──
-function PlaceCard({ place, spotLat, spotLng }: { place: NearbyPlace; spotLat: number; spotLng: number }) {
+function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; spotLat: number; spotLng: number; category: string }) {
   const dist = calcDistance(spotLat, spotLng, place.lat, place.lng);
+  const distLabel = dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(1)}km`;
   const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
+  const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}&destination_place_id=${place.place_id}`;
+  const booking = bookingUrl(place, category);
 
   return (
-    <a
-      href={mapsUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow"
-    >
-      {/* 画像 */}
-      <div className="relative h-24 w-full bg-gray-100">
+    <div className="flex w-44 shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {/* 画像（詳細リンク） */}
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="relative block h-28 w-full bg-gray-100">
         {place.photo_ref ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={photoUrl(place.photo_ref)}
-            alt={place.name}
-            className="h-full w-full object-cover"
-          />
+          <img src={photoUrl(place.photo_ref)} alt={place.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <MapPin className="size-6 text-gray-300" />
           </div>
         )}
 
-        {/* 営業中バッジ */}
+        {/* 距離バッジ（左上） */}
+        <span className="absolute left-1.5 top-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+          {distLabel}
+        </span>
+
+        {/* 営業中バッジ（右上） */}
         {place.open_now != null && (
           <span className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-            place.open_now
-              ? "bg-green-500 text-white"
-              : "bg-gray-500 text-white"
+            place.open_now ? "bg-green-500 text-white" : "bg-gray-500 text-white"
           }`}>
             {place.open_now ? "営業中" : "営業時間外"}
           </span>
         )}
-      </div>
+      </a>
 
       {/* 情報 */}
       <div className="flex flex-1 flex-col gap-1 p-2">
         <p className="line-clamp-2 text-[11px] font-bold leading-tight text-gray-900">{place.name}</p>
         <RatingStars rating={place.rating} count={place.user_ratings_total} />
-        <div className="flex items-center justify-between mt-auto pt-1">
+        {place.vicinity && (
+          <p className="line-clamp-1 text-[9px] text-gray-400">{place.vicinity}</p>
+        )}
+        <div className="mt-0.5">
           <PriceLevel level={place.price_level} />
-          <span className="flex items-center gap-0.5 text-[9px] text-gray-400">
-            <Clock className="size-2.5" />
-            {dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(1)}km`}
-          </span>
+        </div>
+
+        {/* アクションボタン */}
+        <div className="mt-auto flex gap-1 pt-1.5">
+          <a
+            href={dirUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-1 items-center justify-center gap-0.5 rounded-lg bg-gray-100 py-1 text-[9px] font-bold text-gray-600 hover:bg-gray-200"
+          >
+            <Navigation className="size-2.5" />
+            ルート
+          </a>
+          {booking && (
+            <a
+              href={booking.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-0.5 rounded-lg bg-[#E53935] py-1 text-[9px] font-bold text-white hover:bg-[#D32F2F]"
+            >
+              <ExternalLink className="size-2.5" />
+              {booking.label}
+            </a>
+          )}
         </div>
       </div>
-    </a>
+    </div>
   );
 }
 
@@ -156,7 +196,10 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
   return (
     <section className="mt-8 px-4">
       {/* ヘッダー */}
-      <h3 className="mb-3 text-base font-bold text-gray-900">周辺スポット</h3>
+      <div className="mb-3">
+        <h3 className="text-base font-bold text-gray-900">この聖地のまわりで</h3>
+        <p className="text-[11px] text-gray-400">食べる・泊まる・立ち寄るスポット</p>
+      </div>
 
       {/* カテゴリタブ */}
       <div className="mb-3 flex gap-2">
@@ -188,7 +231,7 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
       ) : (
         <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-none pb-2">
           {places.map((place) => (
-            <PlaceCard key={place.place_id} place={place} spotLat={lat} spotLng={lng} />
+            <PlaceCard key={place.place_id} place={place} spotLat={lat} spotLng={lng} category={activeCategory} />
           ))}
         </div>
       )}

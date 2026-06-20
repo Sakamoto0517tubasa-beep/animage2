@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SpotThumbnail from "@/components/SpotThumbnail";
 import { Search, X, MapPin, Train, ArrowLeftRight } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import type { SpotCard } from "@/app/api/spots/route";
@@ -44,12 +44,11 @@ function SpotPicker({
   }, [spots, query]);
 
   if (selected) {
-    const image = selected.thumbnail_fallback_url ?? selected.thumbnail_url;
     return (
       <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-        {image && (
-          <Image src={image} alt={selected.location_name} width={400} height={112} className="h-28 w-full object-cover" />
-        )}
+        <div className="relative h-28 w-full bg-gray-100">
+          <SpotThumbnail lat={selected.lat} lng={selected.lng} alt={selected.location_name} fallbackUrl={selected.thumbnail_fallback_url} className="object-cover" sizes="400px" />
+        </div>
         <div className="p-3">
           <p className="text-[10px] font-semibold text-[#E53935]">{selected.anime_title}</p>
           <p className="mt-0.5 text-sm font-bold leading-snug text-gray-900">{selected.location_name}</p>
@@ -100,9 +99,7 @@ function SpotPicker({
                   onClick={() => { onSelect(spot); setOpen(false); setQuery(""); }}
                 >
                   <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                    {(spot.thumbnail_fallback_url ?? spot.thumbnail_url) && (
-                      <Image src={spot.thumbnail_fallback_url ?? spot.thumbnail_url!} alt="" fill className="object-cover" sizes="36px" />
-                    )}
+                    <SpotThumbnail lat={spot.lat} lng={spot.lng} alt={spot.location_name} fallbackUrl={spot.thumbnail_fallback_url} className="object-cover" sizes="36px" />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-xs font-semibold text-gray-900">{spot.location_name}</p>

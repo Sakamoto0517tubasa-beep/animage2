@@ -35,7 +35,7 @@ export default function ScoreBadge({
     );
   }
 
-  const display = score !== null ? score.toFixed(1) : "—";
+  const display = score != null ? score.toFixed(1) : "—";
   const backgroundColor = getScoreBadgeColor(score);
 
   if (!showDenominator) {

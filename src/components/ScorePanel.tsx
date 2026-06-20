@@ -13,6 +13,7 @@ const SCORE_ITEMS: { key: keyof SpotScores; label: string }[] = [
   { key: "accessibility", label: "アクセス" },
   { key: "photo",         label: "写真映え" },
   { key: "crowding",      label: "混雑度" },
+  { key: "overall",       label: "総合" },
 ];
 
 // ── レーダーチャート（SVG, 4軸 ダイヤモンド配置） ──
@@ -130,11 +131,11 @@ export default function ScorePanel({ scores, reviewCount, className }: ScorePane
         <div className="flex shrink-0 flex-col items-center">
           <RadarChart scores={scores} />
           {scores.overall !== null && (
-            <div className="mt-1 text-center">
+            <div className="mt-2 flex flex-col items-center rounded-xl bg-gray-50 px-3 py-1.5">
+              <span className="text-[10px] font-semibold text-gray-400">総合</span>
               <span className="text-xl font-extrabold tabular-nums" style={{ color: getScoreBadgeColor(scores.overall) }}>
                 {scores.overall.toFixed(1)}
               </span>
-              <span className="ml-0.5 text-[10px] text-gray-400">/10</span>
             </div>
           )}
         </div>

@@ -2,6 +2,26 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Google翻訳ウィジェットのバナー・ツールチップを隠す */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.skiptranslate > iframe {
+  display: none !important;
+  visibility: hidden !important;
+}
+body {
+  top: 0 !important;
+}
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip * {
+  display: none !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

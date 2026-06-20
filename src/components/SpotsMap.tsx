@@ -251,17 +251,30 @@ function CurrentLocationButton({
 
 // ── スポット情報カード（ボトムシート風） ──
 function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => void }) {
+  // マーカーは軽量化のため画像URLを持たない → クリック時に詳細を取得
+  const [detail, setDetail] = useState<SpotWithStats | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setDetail(null);
+    fetch(`/api/spots/${spot.id}`)
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled && d && !d.error) setDetail(d); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [spot.id]);
+
+  const src = detail ?? spot;
   const isAnimeUrl = (url?: string | null) =>
     !!url && !url.includes("maps.googleapis.com") && !url.includes("unsplash.com");
 
-  const animeImg = isAnimeUrl(spot.thumbnail_fallback_url)
-    ? spot.thumbnail_fallback_url!
-    : isAnimeUrl(spot.thumbnail_url)
-      ? spot.thumbnail_url!
+  const animeImg = isAnimeUrl(src.thumbnail_fallback_url)
+    ? src.thumbnail_fallback_url!
+    : isAnimeUrl(src.thumbnail_url)
+      ? src.thumbnail_url!
       : null;
 
-  const streetViewUrl = spot.thumbnail_url?.includes("maps.googleapis.com")
-    ? spot.thumbnail_url : null;
+  const streetViewUrl = src.thumbnail_url?.includes("maps.googleapis.com")
+    ? src.thumbnail_url : null;
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 animate-in slide-in-from-bottom duration-300">

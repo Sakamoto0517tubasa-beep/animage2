@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import AppHeader from "@/components/mobile/AppHeader";
 import BottomNav from "@/components/home/BottomNav";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 export default function MobileShell({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
       {!isHome && <AppHeader />}
       {children}
       {showBottomNav && <BottomNav />}
+      <LanguageSwitcher />
     </div>
   );
 }

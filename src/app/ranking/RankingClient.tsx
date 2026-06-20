@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SpotThumbnail from "@/components/SpotThumbnail";
 import { MapPin, Star, Train } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import type { SpotCard } from "@/app/api/spots/route";
@@ -79,7 +79,6 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
   scoreKey: keyof Pick<SpotCard, "overall_score" | "score_reenactment" | "score_accessibility" | "score_photo" | "score_crowding">;
   scoreLabel?: string;
 }) {
-  const img = spot.thumbnail_fallback_url ?? spot.thumbnail_url;
   const score = spot[scoreKey] as number | null;
   return (
     <Link
@@ -88,7 +87,7 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
     >
       <RankBadge rank={rank} />
       <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-        {img && <Image src={img} alt={spot.location_name} fill className="object-cover" sizes="48px" />}
+        <SpotThumbnail lat={spot.lat} lng={spot.lng} alt={spot.location_name} fallbackUrl={spot.thumbnail_fallback_url} className="object-cover" sizes="48px" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[10px] font-semibold text-[#E53935]">{spot.anime_title}</p>
@@ -105,7 +104,6 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
 
 // ── 都道府県ランキング行 ──
 function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
-  const img = pref.topSpot?.thumbnail_fallback_url ?? pref.topSpot?.thumbnail_url;
   const color = pref.avgScore != null ? getScoreBadgeColor(pref.avgScore) : "#9CA3AF";
   return (
     <Link
@@ -114,7 +112,7 @@ function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
     >
       <RankBadge rank={rank} />
       <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-        {img && <Image src={img} alt={pref.city} fill className="object-cover" sizes="48px" />}
+        {pref.topSpot && <SpotThumbnail lat={pref.topSpot.lat} lng={pref.topSpot.lng} alt={pref.city} fallbackUrl={pref.topSpot.thumbnail_fallback_url} className="object-cover" sizes="48px" />}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-gray-900">{pref.city}</p>

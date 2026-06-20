@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { CheckCircle2, MapPin, Train } from "lucide-react";
 import ScoreBadge from "@/components/ScoreBadge";
+import SpotThumbnail from "@/components/SpotThumbnail";
 import { isVisited } from "@/lib/visited";
 import type { SpotWithStats } from "@/types/supabase";
 
@@ -14,7 +14,6 @@ type HomeSpotCardProps = {
 
 export default function HomeSpotCard({ spot }: HomeSpotCardProps) {
   const [visited, setVisited] = useState(false);
-  const imageUrl = spot.thumbnail_fallback_url ?? spot.thumbnail_url ?? null;
 
   useEffect(() => {
     setVisited(isVisited(spot.id));
@@ -31,21 +30,16 @@ export default function HomeSpotCard({ spot }: HomeSpotCardProps) {
       href={`/spots/${spot.id}`}
       className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm active:opacity-80"
     >
-      {/* サムネイル */}
+      {/* サムネイル（Googleストリートビュー／なければ地図） */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={spot.location_name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, 200px"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="size-8 text-gray-300" />
-          </div>
-        )}
+        <SpotThumbnail
+          lat={spot.lat}
+          lng={spot.lng}
+          alt={spot.location_name}
+          fallbackUrl={spot.thumbnail_fallback_url}
+          className="object-cover"
+          sizes="(max-width: 640px) 50vw, 200px"
+        />
         {/* スコアバッジ（右上） */}
         <div className="absolute right-2 top-2">
           <ScoreBadge score={spot.overall_score} reviewCount={spot.review_count} size="sm" />

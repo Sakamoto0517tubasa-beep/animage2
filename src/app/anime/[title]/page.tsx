@@ -6,8 +6,9 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { getSpotsByAnime } from "@/lib/anime";
-import HomeSpotCard from "@/components/home/HomeSpotCard";
+import AnimeSpotGrid from "@/components/AnimeSpotGrid";
 import ShareButton from "@/components/ShareButton";
+import type { SpotWithStats } from "@/types/supabase";
 
 type PageProps = { params: Promise<{ title: string }> };
 
@@ -95,13 +96,22 @@ export default async function AnimeSpotsPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* スポットグリッド */}
+      {/* スポットグリッド（初期40件＋無限スクロール・データもスリム化） */}
       <div className="p-3">
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-          {spots.map((spot) => (
-            <HomeSpotCard key={spot.id} spot={spot} />
-          ))}
-        </div>
+        <AnimeSpotGrid
+          spots={spots.map((s) => ({
+            id: s.id,
+            anime_title: s.anime_title,
+            location_name: s.location_name,
+            lat: s.lat,
+            lng: s.lng,
+            city: s.city,
+            train_minutes: s.train_minutes,
+            overall_score: s.overall_score,
+            review_count: s.review_count,
+            thumbnail_fallback_url: s.thumbnail_fallback_url,
+          })) as SpotWithStats[]}
+        />
       </div>
     </div>
   );

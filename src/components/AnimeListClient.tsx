@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Search, SortAsc, BarChart2, X } from "lucide-react";
@@ -111,7 +111,9 @@ export default function AnimeListClient({ animeList }: { animeList: AnimeItem[] 
   const [query, setQuery]     = useState("");
   const [sort, setSort]       = useState<SortMode>("popular");
   const [kanaFilter, setKanaFilter] = useState<KanaGroup | null>(null);
+  const [visibleCount, setVisibleCount] = useState(40); // 初期表示件数（残りはスクロールで追加）
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const isSearching = query.trim().length > 0;
 
@@ -158,6 +160,21 @@ export default function AnimeListClient({ animeList }: { animeList: AnimeItem[] 
   const displayList = grouped
     ? (kanaFilter ? (grouped.get(kanaFilter) ?? []) : processed)
     : processed;
+
+  // 検索・ソート変更時に表示件数をリセット
+  useEffect(() => { setVisibleCount(40); }, [query, sort, kanaFilter]);
+
+  // 無限スクロール（初期40件 → 近づいたら+40）
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) setVisibleCount((c) => c + 40); },
+      { rootMargin: "400px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [displayList.length]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -276,10 +293,17 @@ export default function AnimeListClient({ animeList }: { animeList: AnimeItem[] 
             })}
           </>
         ) : (
-          // 人気順 or 検索結果
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            {displayList.map((a) => <AnimeCard key={a.title} anime={a} query={query} />)}
-          </div>
+          // 人気順 or 検索結果（初期40件＋無限スクロール）
+          <>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {displayList.slice(0, visibleCount).map((a) => <AnimeCard key={a.title} anime={a} query={query} />)}
+            </div>
+            {visibleCount < displayList.length && (
+              <div ref={sentinelRef} className="py-6 text-center text-xs text-gray-400">
+                読み込み中…（{displayList.length - visibleCount}作品）
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -81,6 +81,8 @@ export type SpotCard = {
   anime_title: string;
   location_name: string;
   city: string;
+  lat: number;
+  lng: number;
   train_minutes: number | null;
   thumbnail_url: string | null;
   thumbnail_fallback_url: string | null;
@@ -179,6 +181,8 @@ export async function GET(req: NextRequest) {
       anime_title: s.anime_title,
       location_name: s.location_name,
       city: inferPrefecture(s.lat, s.lng),
+      lat: s.lat,
+      lng: s.lng,
       train_minutes: s.train_minutes,
       thumbnail_fallback_url: img,
       thumbnail_url: img,

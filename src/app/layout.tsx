@@ -72,8 +72,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={cn("font-sans", geist.variable, playfair.variable, cinzel.variable)}>
-      <body className="min-h-screen bg-gray-100 text-gray-900 antialiased">
+    <html lang="ja" suppressHydrationWarning className={cn("font-sans", geist.variable, playfair.variable, cinzel.variable)}>
+      <body suppressHydrationWarning className="min-h-screen bg-gray-100 text-gray-900 antialiased">
         <MobileShell>{children}</MobileShell>
         <PWAProvider />
       </body>

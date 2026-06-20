@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { MapPin, Train } from "lucide-react";
+import SpotThumbnail from "@/components/SpotThumbnail";
 import type { SpotCard } from "@/app/api/spots/route";
 
 export default function RelatedSpots({
@@ -42,7 +42,6 @@ export default function RelatedSpots({
       </div>
       <div className="flex gap-2.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {spots.map((spot) => {
-          const img = spot.thumbnail_fallback_url ?? spot.thumbnail_url;
           return (
             <Link
               key={spot.id}
@@ -50,13 +49,7 @@ export default function RelatedSpots({
               className="w-36 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm active:opacity-75"
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-                {img ? (
-                  <Image src={img} alt={spot.location_name} fill className="object-cover" sizes="144px" />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <MapPin className="size-6 text-gray-300" />
-                  </div>
-                )}
+                <SpotThumbnail lat={spot.lat} lng={spot.lng} alt={spot.location_name} fallbackUrl={spot.thumbnail_fallback_url} className="object-cover" sizes="144px" />
               </div>
               <div className="p-2">
                 <p className="line-clamp-2 text-[11px] font-bold leading-snug text-gray-900">{spot.location_name}</p>

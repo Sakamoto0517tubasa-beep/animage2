@@ -20,9 +20,9 @@ export function getSpotStreetViewUrl(
   }
 
   const params = new URLSearchParams({
-    size: "400x300",
+    size: "640x480", // Street View Static の最大サイズ（高画質）
     location: `${lat},${lng}`,
-    fov: "90",
+    fov: "80",
     return_error_code: "true",
     key: apiKey,
   });
@@ -43,7 +43,8 @@ export function getSpotSatelliteThumbnailUrl(
   const params = new URLSearchParams({
     center: `${lat},${lng}`,
     zoom: "16",
-    size: "400x300",
+    size: "640x480",
+    scale: "2", // 高解像度（Retina対応）
     maptype: "satellite",
     markers: `color:red|${lat},${lng}`,
     key: apiKey,

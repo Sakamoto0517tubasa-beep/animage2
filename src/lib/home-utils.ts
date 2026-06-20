@@ -57,8 +57,8 @@ export type CityFilter = (typeof CITIES)[number];
  * 10 点 → 青緑  (#00ACC1)
  * HSL で hue を 0°(赤) → 195°(青緑) へ線形補間
  */
-export function getScoreBadgeColor(score: number | null): string {
-  if (score === null) return "#9CA3AF"; // gray
+export function getScoreBadgeColor(score: number | null | undefined): string {
+  if (score == null) return "#9CA3AF"; // gray
 
   const clamped = Math.min(10, Math.max(1, score));
   const t = (clamped - 1) / 9; // 0.0 〜 1.0

@@ -27,6 +27,8 @@ async function getUserFavorites(userId: string): Promise<FavoriteSpot[]> {
         id: s.id,
         location_name: s.location_name,
         anime_title: s.anime_title,
+        lat: s.lat,
+        lng: s.lng,
         thumbnail_url: s.thumbnail_url,
         thumbnail_fallback_url: null,
         city: null,
