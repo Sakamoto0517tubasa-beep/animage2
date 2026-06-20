@@ -20,7 +20,7 @@ const cinzel = Cinzel({
   variable: "--font-cinzel",
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://anigri.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://animeji.app";
 
 export const viewport: Viewport = {
   themeColor: "#E53935",
@@ -33,30 +33,30 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Anigri — アニメ聖地巡礼レビュー",
-    template: "%s | Anigri",
+    default: "Animeji — アニメ聖地巡礼レビュー",
+    template: "%s | Animeji",
   },
   description: "全国のアニメ聖地を探して、訪問した感想をレビュー。ファンのリアルな評価で聖地巡礼をもっと楽しく。",
   metadataBase: new URL(APP_URL),
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    siteName: "Anigri",
-    title: "Anigri — アニメ聖地巡礼レビュー",
+    siteName: "Animeji",
+    title: "Animeji — アニメ聖地巡礼レビュー",
     description: "全国のアニメ聖地を探して、訪問した感想をレビュー。ファンのリアルな評価で聖地巡礼をもっと楽しく。",
     url: APP_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anigri — アニメ聖地巡礼レビュー",
+    title: "Animeji — アニメ聖地巡礼レビュー",
     description: "全国のアニメ聖地を探して、訪問した感想をレビュー。",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Anigri",
+    title: "Animeji",
   },
-  applicationName: "Anigri",
+  applicationName: "Animeji",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },

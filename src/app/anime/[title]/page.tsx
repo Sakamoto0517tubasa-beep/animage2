@@ -88,7 +88,7 @@ export default async function AnimeSpotsPage({ params }: PageProps) {
               {spots.length} 聖地スポット
             </p>
             <ShareButton
-              title={`${decodedTitle}の聖地巡礼｜Anigri`}
+              title={`${decodedTitle}の聖地巡礼｜Animeji`}
               text={`「${decodedTitle}」の聖地が${spots.length}件！アニメ聖地巡礼マップをチェック。`}
               className="border-white/30 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50"
             />

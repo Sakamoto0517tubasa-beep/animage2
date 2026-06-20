@@ -105,7 +105,7 @@ export default function HomePageClient() {
         <header className="bg-[#E53935] px-4 pb-3 pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-white/70">Anigri</p>
+              <p className="text-xs font-semibold text-white/70">Animeji</p>
               <h1 className="text-lg font-black text-white">AI聖地レコメンド</h1>
             </div>
           </div>

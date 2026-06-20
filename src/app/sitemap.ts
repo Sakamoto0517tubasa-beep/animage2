@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getSpotsForMarkers } from "@/lib/spots";
 import { getAnimeList } from "@/lib/anime";
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://anigri.app";
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://animeji.app";
 
 export const revalidate = 86400; // 1日ごとに再生成
 

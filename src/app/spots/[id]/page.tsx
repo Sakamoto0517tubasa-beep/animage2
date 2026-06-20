@@ -173,7 +173,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
           </Button>
           <VisitedButton spotId={spot.id} className="shrink-0" />
           <ShareButton
-            title={`${spot.location_name}｜Anigri`}
+            title={`${spot.location_name}｜Animeji`}
             text={`「${spot.anime_title}」の聖地「${spot.location_name}」をチェック！`}
             className="rounded-xl px-3 shrink-0"
           />
