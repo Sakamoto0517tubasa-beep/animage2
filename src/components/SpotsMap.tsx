@@ -264,14 +264,6 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
   }, [spot.id]);
 
   const src = detail ?? spot;
-  const isAnimeUrl = (url?: string | null) =>
-    !!url && !url.includes("maps.googleapis.com") && !url.includes("unsplash.com");
-
-  const animeImg = isAnimeUrl(src.thumbnail_fallback_url)
-    ? src.thumbnail_fallback_url!
-    : isAnimeUrl(src.thumbnail_url)
-      ? src.thumbnail_url!
-      : null;
 
   const streetViewUrl = src.thumbnail_url?.includes("maps.googleapis.com")
     ? src.thumbnail_url : null;
@@ -280,22 +272,12 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
     <div className="absolute bottom-0 left-0 right-0 z-10 animate-in slide-in-from-bottom duration-300">
       <div className="mx-3 mb-4 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
         {/* 画像エリア */}
-        {(animeImg || streetViewUrl) && (
+        {streetViewUrl && (
           <div className="relative h-36 w-full bg-gray-100">
             <div className="flex h-full">
-              {animeImg && (
-                <div className="relative h-full flex-1 overflow-hidden">
-                  <Image src={animeImg} alt={spot.location_name} fill className="object-cover" sizes="200px" />
-                  <span className="absolute bottom-1 left-1.5 rounded bg-black/55 px-1.5 py-0.5 text-[9px] font-semibold text-white">アニメ</span>
-                </div>
-              )}
-              {animeImg && streetViewUrl && <div className="w-px bg-white/60" />}
-              {streetViewUrl && (
-                <div className="relative h-full flex-1 overflow-hidden">
-                  <Image src={streetViewUrl} alt="現地" fill className="object-cover" sizes="200px" />
-                  <span className="absolute bottom-1 right-1.5 rounded bg-black/55 px-1.5 py-0.5 text-[9px] font-semibold text-white">現地</span>
-                </div>
-              )}
+              <div className="relative h-full flex-1 overflow-hidden">
+                <Image src={streetViewUrl} alt={spot.location_name} fill className="object-cover" sizes="200px" />
+              </div>
             </div>
             {/* グラデーションオーバーレイ */}
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2 pt-8">
@@ -313,7 +295,7 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
 
         {/* 情報行 */}
         <div className="flex items-center gap-3 px-4 py-3">
-          {!animeImg && !streetViewUrl && (
+          {!streetViewUrl && (
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-gray-900">{spot.location_name}</p>
               <p className="truncate text-xs text-[#E53935]">{spot.anime_title}</p>
@@ -333,7 +315,7 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
               <Link href={`/spots/${spot.id}`}>詳細</Link>
             </Button>
           </div>
-          {(!animeImg && !streetViewUrl) && (
+          {!streetViewUrl && (
             <button onClick={onClose} className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-100">
               <X className="size-4" />
             </button>

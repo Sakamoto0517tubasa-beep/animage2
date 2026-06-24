@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const titleStr = `${decodedTitle}の聖地巡礼`;
   const description = `「${decodedTitle}」の聖地スポットが${spots.length}件。アニメ聖地巡礼マップとレビューをチェック。`;
-  const image = spots[0]?.thumbnail_fallback_url ?? spots[0]?.thumbnail_url ?? undefined;
+  const image = spots.find((s) => s.thumbnail_url?.includes("maps.googleapis.com"))?.thumbnail_url ?? undefined;
 
   return {
     title: titleStr,
@@ -45,10 +45,8 @@ export default async function AnimeSpotsPage({ params }: PageProps) {
 
   if (!spots.length) notFound();
 
-  // ヒーロー画像：アニメ画像を優先
   const heroImage =
-    spots.find((s) => s.thumbnail_fallback_url)?.thumbnail_fallback_url ??
-    spots[0]?.thumbnail_url ??
+    spots.find((s) => s.thumbnail_url?.includes("maps.googleapis.com"))?.thumbnail_url ??
     null;
 
   return (

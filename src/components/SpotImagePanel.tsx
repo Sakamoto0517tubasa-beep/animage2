@@ -8,52 +8,22 @@ type SpotImagePanelProps = {
   locationName: string;
 };
 
-export default function SpotImagePanel({ animeImageUrl, streetViewUrl, locationName }: SpotImagePanelProps) {
-  if (!animeImageUrl && !streetViewUrl) return null;
-
-  const hasBoth = !!(animeImageUrl && streetViewUrl);
+export default function SpotImagePanel({ streetViewUrl, locationName }: SpotImagePanelProps) {
+  if (!streetViewUrl) return null;
 
   return (
     <div className="relative h-64 w-full bg-gray-100 sm:h-72">
       <div className="flex h-full">
-        {animeImageUrl && (
-          <div className="relative h-full flex-1 overflow-hidden">
-            <Image
-              src={animeImageUrl}
-              alt={locationName}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, 640px"
-              priority
-            />
-            {hasBoth && (
-              <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white backdrop-blur-sm">
-                アニメ
-              </div>
-            )}
-          </div>
-        )}
-
-        {hasBoth && (
-          <div className="relative z-10 w-0.5 bg-white shadow-md" />
-        )}
-
-        {streetViewUrl && (
-          <div className="relative h-full flex-1 overflow-hidden">
-            <Image
-              src={streetViewUrl}
-              alt="現地"
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, 640px"
-            />
-            {hasBoth && (
-              <div className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white backdrop-blur-sm">
-                現地
-              </div>
-            )}
-          </div>
-        )}
+        <div className="relative h-full flex-1 overflow-hidden">
+          <Image
+            src={streetViewUrl}
+            alt={locationName}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 640px"
+            priority
+          />
+        </div>
       </div>
 
       {/* 下部グラデーション */}

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: SpotDetailPageProps): Promise
 
   const title = `${spot.location_name} - ${spot.anime_title}`;
   const description = `「${spot.anime_title}」の聖地「${spot.location_name}」。${spot.address ? spot.address + "。" : ""}アニメ聖地巡礼スポットのレビューや写真をチェック。`;
-  const image = spot.thumbnail_fallback_url ?? spot.thumbnail_url ?? undefined;
+  const image = spot.thumbnail_url?.includes("maps.googleapis.com") ? spot.thumbnail_url : undefined;
 
   return {
     title,
@@ -72,15 +72,6 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
   const reviewCount = reviews.length;
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}&travelmode=transit`;
 
-  const isAnimeUrl = (url?: string | null) =>
-    !!url && !url.includes("maps.googleapis.com") && !url.includes("unsplash.com");
-
-  const animeImageUrl = isAnimeUrl(spot.thumbnail_fallback_url)
-    ? spot.thumbnail_fallback_url!
-    : isAnimeUrl(spot.thumbnail_url)
-      ? spot.thumbnail_url!
-      : null;
-
   const streetViewUrl = spot.thumbnail_url?.includes("maps.googleapis.com")
     ? spot.thumbnail_url
     : null;
@@ -91,7 +82,6 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
     "@type": "TouristAttraction",
     name: spot.location_name,
     description: `「${spot.anime_title}」の聖地巡礼スポット`,
-    ...(animeImageUrl && { image: animeImageUrl }),
     ...(spot.address && { address: spot.address }),
     geo: {
       "@type": "GeoCoordinates",
@@ -115,7 +105,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <SpotImagePanel
-        animeImageUrl={animeImageUrl}
+        animeImageUrl={null}
         streetViewUrl={streetViewUrl}
         locationName={spot.location_name}
       />
