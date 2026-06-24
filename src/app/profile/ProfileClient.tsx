@@ -208,9 +208,10 @@ export default function ProfileClient({
     const missingIds = visitedIds.filter((id) => !visitedSpots.find((s) => s.id === id));
     if (missingIds.length === 0) return;
     setVisitedLoading(true);
-    fetch("/api/spots")
+    fetch(`/api/spots?ids=${visitedIds.join(",")}`)
       .then((r) => r.json())
-      .then((all: FavoriteSpot[]) => {
+      .then((data: { spots: FavoriteSpot[] }) => {
+        const all = data.spots ?? [];
         const matched = visitedIds
           .map((id) => all.find((s: FavoriteSpot) => s.id === id))
           .filter(Boolean) as FavoriteSpot[];
@@ -228,9 +229,10 @@ export default function ProfileClient({
     const missingIds = guestFavIds.filter((id) => !guestFavSpots.find((s) => s.id === id));
     if (missingIds.length === 0) return;
     setGuestFavLoading(true);
-    fetch("/api/spots")
+    fetch(`/api/spots?ids=${guestFavIds.join(",")}`)
       .then((r) => r.json())
-      .then((all: FavoriteSpot[]) => {
+      .then((data: { spots: FavoriteSpot[] }) => {
+        const all = data.spots ?? [];
         const matched = guestFavIds
           .map((id) => all.find((s: FavoriteSpot) => s.id === id))
           .filter(Boolean) as FavoriteSpot[];

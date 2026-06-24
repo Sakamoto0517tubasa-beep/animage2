@@ -58,6 +58,8 @@ export async function GET(req: NextRequest) {
   const city   = searchParams.get("city") ?? "すべて";
   const sort   = searchParams.get("sort") ?? "score";
   const offset = Math.max(0, parseInt(searchParams.get("offset") ?? "0", 10));
+  const idsParam = searchParams.get("ids");
+  const filterIds = idsParam ? new Set(idsParam.split(",").map((s) => s.trim()).filter(Boolean)) : null;
 
   const [rawSpots, rawReviews] = await Promise.all([
     getCachedRawSpots(),
@@ -104,6 +106,7 @@ export async function GET(req: NextRequest) {
   });
 
   const filtered = cards.filter((s) => {
+    if (filterIds && !filterIds.has(s.id)) return false;
     if (city !== "すべて" && s.city !== city) return false;
     if (!q) return true;
     return s.location_name.toLowerCase().includes(q) || s.anime_title.toLowerCase().includes(q);
