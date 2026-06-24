@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Geist, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import MobileShell from "@/components/mobile/MobileShell";
 import PWAProvider from "@/components/PWAProvider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
+
+const GA_ID = "G-0NYV0BKFJ2";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -79,6 +82,7 @@ export default function RootLayout({
         <PWAProvider />
         <Analytics />
       </body>
+      <GoogleAnalytics gaId={GA_ID} />
     </html>
   );
 }
