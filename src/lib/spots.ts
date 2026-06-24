@@ -4,76 +4,14 @@ import { getReviewAggregatesBySpotIds, type ReviewAggregate } from "@/lib/review
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SpotWithStats } from "@/types/supabase";
-import ANITABI_DATA from "@/data/anitabi-images.json";
+import { findImageByCoord, findImageByTitle } from "@/lib/spot-cards";
 
 export { getSpotSatelliteThumbnailUrl, getSpotStreetViewUrl, getSpotThumbnailUrl } from "@/lib/spot-thumbnails";
 
-const BASE_URL = "https://image.anitabi.cn/points/";
-
-function toFullUrl(path: string): string {
-  return path.startsWith("http") ? path : `${BASE_URL}${path}?plan=h160`;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { points: RAW_POINTS, byTitle: ANITABI_BY_TITLE } = ANITABI_DATA as any;
-
-// Sort by latitude for binary search
-const SORTED_POINTS = [...RAW_POINTS].sort((a, b) => a[0] - b[0]);
-
-// Cache: "lat,lng" -> imageUrl | null
-const coordCache = new Map<string, string | null>();
-const titleIndexMap = new Map<string, number>();
-
-const LAT_THRESHOLD = 0.002; // ~200m in degrees
-const DIST_THRESHOLD = 0.0000032; // (200/111320)^2
-
-function findAnitabiImageByCoord(lat: number, lng: number): string | null {
-  const key = `${lat},${lng}`;
-  if (coordCache.has(key)) return coordCache.get(key)!;
-
-  // Binary search for lat - LAT_THRESHOLD
-  let lo = 0, hi = SORTED_POINTS.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (SORTED_POINTS[mid][0] < lat - LAT_THRESHOLD) lo = mid + 1;
-    else hi = mid;
-  }
-
-  const cosLat = Math.cos(lat * Math.PI / 180);
-  let bestDist = DIST_THRESHOLD;
-  let bestPath: string | null = null;
-
-  for (let i = lo; i < SORTED_POINTS.length; i++) {
-    const [plat, plng, path] = SORTED_POINTS[i];
-    if (plat > lat + LAT_THRESHOLD) break;
-    const dlat = plat - lat;
-    const dlng = (plng - lng) * cosLat;
-    const d = dlat * dlat + dlng * dlng;
-    if (d < bestDist) { bestDist = d; bestPath = path; }
-  }
-
-  const result = bestPath ? toFullUrl(bestPath) : null;
-  coordCache.set(key, result);
-  return result;
-}
-
-function findAnitabiImageByTitle(animeTitle: string): string | null {
-  let imgs = ANITABI_BY_TITLE[animeTitle];
-  if (!imgs) {
-    for (const [key, val] of Object.entries(ANITABI_BY_TITLE)) {
-      if (animeTitle.includes(key) || key.includes(animeTitle)) { imgs = val; break; }
-    }
-  }
-  if (!imgs?.length) return null;
-  const idx = (titleIndexMap.get(animeTitle) ?? 0) % imgs.length;
-  titleIndexMap.set(animeTitle, idx + 1);
-  return toFullUrl(imgs[idx]);
-}
-
 function applyThumbnail(spot: SpotWithStats): SpotWithStats {
   const animeImage =
-    findAnitabiImageByCoord(spot.lat, spot.lng) ??
-    findAnitabiImageByTitle(spot.anime_title);
+    findImageByCoord(spot.lat, spot.lng) ??
+    findImageByTitle(spot.anime_title);
 
   return {
     ...spot,
@@ -219,8 +157,8 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
     const lat = seed?.lat ?? s.lat;
     const lng = seed?.lng ?? s.lng;
     const animeImage =
-      findAnitabiImageByCoord(lat, lng) ??
-      findAnitabiImageByTitle(seed?.anime_title ?? s.anime_title);
+      findImageByCoord(lat, lng) ??
+      findImageByTitle(seed?.anime_title ?? s.anime_title);
 
     return {
       id: s.id,

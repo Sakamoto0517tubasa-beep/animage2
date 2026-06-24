@@ -2,19 +2,7 @@ import { getSpotsForMarkers } from "@/lib/spots";
 import { getSpotThumbnailUrl } from "@/lib/spot-thumbnails";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SpotWithStats } from "@/types/supabase";
-import ANITABI_DATA from "@/data/anitabi-images.json";
-
-// ── Anitabi byTitle ルックアップ ──
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { points: RAW_POINTS, byTitle: ANITABI_BY_TITLE } = ANITABI_DATA as any;
-const SORTED_POINTS = [...RAW_POINTS].sort((a, b) => a[0] - b[0]);
-const BASE_URL = "https://image.anitabi.cn/points/";
-const LAT_THR = 0.002;
-const DIST_THR = 0.0000032;
-
-function toFullUrl(path: string): string {
-  return path.startsWith("http") ? path : `${BASE_URL}${path}?plan=h160`;
-}
+import { findImageByCoord, findImageByTitle as findImgByTitle } from "@/lib/spot-cards";
 
 /** アニメタイトルを正規化（シーズン情報・特殊引用符を除去） */
 function normalizeTitle(t: string): string {
@@ -28,62 +16,6 @@ function normalizeTitle(t: string): string {
     .trim();
 }
 
-/** byTitle からアニメ画像を取得（正規化 + 部分一致） */
-const titleImgCache = new Map<string, string | null>();
-
-function findImageByTitle(title: string): string | null {
-  if (titleImgCache.has(title)) return titleImgCache.get(title)!;
-
-  // 1. 完全一致
-  const direct = ANITABI_BY_TITLE[title];
-  if (direct?.length) {
-    const url = toFullUrl(direct[0]);
-    titleImgCache.set(title, url);
-    return url;
-  }
-
-  // 2. 正規化後に完全一致
-  const normalized = normalizeTitle(title);
-  const normDirect = ANITABI_BY_TITLE[normalized];
-  if (normDirect?.length) {
-    const url = toFullUrl(normDirect[0]);
-    titleImgCache.set(title, url);
-    return url;
-  }
-
-  // 3. 部分一致（正規化後のキーが title に含まれる、または逆）
-  for (const [k, v] of Object.entries(ANITABI_BY_TITLE) as [string, string[]][]) {
-    if (!v.length) continue;
-    const kn = normalizeTitle(k);
-    if (normalized.includes(kn) || kn.includes(normalized)) {
-      const url = toFullUrl(v[0]);
-      titleImgCache.set(title, url);
-      return url;
-    }
-  }
-
-  titleImgCache.set(title, null);
-  return null;
-}
-
-/** 座標からアニメ画像を取得 */
-function findImageByCoord(lat: number, lng: number): string | null {
-  let lo = 0, hi = SORTED_POINTS.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (SORTED_POINTS[mid][0] < lat - LAT_THR) lo = mid + 1;
-    else hi = mid;
-  }
-  const cos = Math.cos(lat * Math.PI / 180);
-  let best = DIST_THR, path: string | null = null;
-  for (let i = lo; i < SORTED_POINTS.length; i++) {
-    const [plat, plng, p] = SORTED_POINTS[i];
-    if (plat > lat + LAT_THR) break;
-    const d = (plat - lat) ** 2 + ((plng - lng) * cos) ** 2;
-    if (d < best) { best = d; path = p; }
-  }
-  return path ? toFullUrl(path) : null;
-}
 
 export type AnimeEntry = {
   title: string;
@@ -119,7 +51,7 @@ export async function getAnimeList(): Promise<AnimeEntry[]> {
           entry.thumbnail = coordImg;
         } else {
           // ② byTitle ルックアップ（正規化マッチング）
-          const titleImg = findImageByTitle(t);
+          const titleImg = findImgByTitle(t);
           if (titleImg) entry.thumbnail = titleImg;
         }
       }
@@ -166,7 +98,7 @@ export async function getSpotsByAnime(title: string): Promise<SpotWithStats[]> {
       train_minutes: number | null;
     }) => {
       const animeImg =
-        findImageByCoord(s.lat, s.lng) ?? findImageByTitle(s.anime_title);
+        findImageByCoord(s.lat, s.lng) ?? findImgByTitle(s.anime_title);
       return {
         ...s,
         description: s.description ?? "",

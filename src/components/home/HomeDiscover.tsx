@@ -1,14 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, Map, MapPin, Search, Star, Train, TrendingUp } from "lucide-react";
-import LogoWordmark from "@/components/LogoWordmark";
-import NotificationBell from "@/components/home/NotificationBell";
+import { ChevronRight, MapPin, Search, Star, Train, TrendingUp } from "lucide-react";
 import HomeSpotCard from "@/components/home/HomeSpotCard";
-import type { SpotCard } from "@/app/api/spots/route";
+import type { SpotCard } from "@/lib/spot-cards";
 import type { AnimeEntry } from "@/lib/anime";
+import HomeBannerClient from "@/components/home/HomeBannerClient";
 
 // ── セクションヘッダー ──
 function SectionHeader({
@@ -34,24 +30,14 @@ function SectionHeader({
 }
 
 // ── 横スクロールスポットカルーセル ──
-function SpotCarousel({ spots, loading }: { spots: SpotCard[]; loading: boolean }) {
+function SpotCarousel({ spots }: { spots: SpotCard[] }) {
   return (
     <div className="flex gap-2.5 overflow-x-auto px-4 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      {loading
-        ? Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="w-36 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-              <div className="aspect-[4/3] animate-pulse bg-gray-200" />
-              <div className="space-y-1.5 p-2.5">
-                <div className="h-2 w-3/4 animate-pulse rounded bg-gray-200" />
-                <div className="h-3 w-full animate-pulse rounded bg-gray-200" />
-              </div>
-            </div>
-          ))
-        : spots.map((spot) => (
-            <div key={spot.id} className="w-36 shrink-0">
-              <HomeSpotCard spot={spot as never} />
-            </div>
-          ))}
+      {spots.map((spot) => (
+        <div key={spot.id} className="w-36 shrink-0">
+          <HomeSpotCard spot={spot as never} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -95,67 +81,23 @@ function AnimeCarousel({ animeList }: { animeList: AnimeEntry[] }) {
   );
 }
 
-// ── バナー（コンパクト） ──
-function HomeBanner({ onSearchFocus }: { onSearchFocus: () => void }) {
-  return (
-    <div className="bg-[#E53935] px-4 pb-4 pt-4">
-      {/* ロゴ行 */}
-      <div className="flex items-center justify-between">
-        <LogoWordmark as="span" className="text-white" />
-        <div className="flex items-center gap-1">
-          <NotificationBell />
-          <Link
-            href="/spots/map"
-            className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-semibold text-white"
-          >
-            <Map className="size-3.5" />
-            マップ
-          </Link>
-        </div>
-      </div>
-      {/* 検索バー（タップで /spots へ） */}
-      <button
-        type="button"
-        onClick={onSearchFocus}
-        className="relative mt-3 flex h-11 w-full items-center rounded-full bg-white px-4 text-left"
-      >
-        <Search className="mr-2.5 size-4 shrink-0 text-gray-400" />
-        <span className="text-sm text-gray-400">聖地・アニメ名で検索</span>
-      </button>
-    </div>
-  );
-}
 
 // ── メイン ──
-export default function HomeDiscover({ animeList, spotCount = 0 }: { animeList: AnimeEntry[]; spotCount?: number }) {
-  const [topSpots, setTopSpots] = useState<SpotCard[]>([]);
-  const [hotSpots, setHotSpots] = useState<SpotCard[]>([]);
-  const [loadingTop, setLoadingTop] = useState(true);
-  const [loadingHot, setLoadingHot] = useState(true);
-  useEffect(() => {
-    // 人気スポット（スコア順）
-    fetch("/api/spots?sort=score&limit=12")
-      .then((r) => r.json())
-      .then((d) => setTopSpots(d.spots ?? []))
-      .catch(() => {})
-      .finally(() => setLoadingTop(false));
-
-    // 注目スポット（レビュー数順）
-    fetch("/api/spots?sort=reviews&limit=12")
-      .then((r) => r.json())
-      .then((d) => setHotSpots(d.spots ?? []))
-      .catch(() => {})
-      .finally(() => setLoadingHot(false));
-  }, []);
-
-  function handleSearchFocus() {
-    window.location.href = "/spots";
-  }
-
+export default function HomeDiscover({
+  animeList,
+  spotCount = 0,
+  topSpots,
+  hotSpots,
+}: {
+  animeList: AnimeEntry[];
+  spotCount?: number;
+  topSpots: SpotCard[];
+  hotSpots: SpotCard[];
+}) {
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* ヘッダー */}
-      <HomeBanner onSearchFocus={handleSearchFocus} />
+      <HomeBannerClient />
 
       {/* 人気スポット */}
       <section className="mt-5">
@@ -164,7 +106,7 @@ export default function HomeDiscover({ animeList, spotCount = 0 }: { animeList: 
           icon={<TrendingUp className="size-4 text-[#E53935]" />}
           href="/spots?sort=score"
         />
-        <SpotCarousel spots={topSpots} loading={loadingTop} />
+        <SpotCarousel spots={topSpots} />
       </section>
 
       {/* レビュー注目スポット */}
@@ -174,7 +116,7 @@ export default function HomeDiscover({ animeList, spotCount = 0 }: { animeList: 
           icon={<Star className="size-4 text-amber-500" />}
           href="/spots?sort=reviews"
         />
-        <SpotCarousel spots={hotSpots} loading={loadingHot} />
+        <SpotCarousel spots={hotSpots} />
       </section>
 
       {/* アニメから探す */}
