@@ -3,9 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import SpotThumbnail from "@/components/SpotThumbnail";
-import { Search, X, MapPin, Train, ArrowLeftRight } from "lucide-react";
+import { Search, X, MapPin, Train, ArrowLeftRight, Car, PersonStanding, Navigation } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import type { SpotCard } from "@/app/api/spots/route";
+import type { TravelTime } from "@/app/api/travel-time/route";
 
 type SelectedSpot = SpotCard | null;
 
@@ -158,6 +159,73 @@ function CompareBar({
   );
 }
 
+// ── 移動時間表示 ──
+function TravelTimePanel({ spotA, spotB }: { spotA: SpotCard; spotB: SpotCard }) {
+  const [data, setData] = useState<TravelTime | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    setData(null);
+    fetch(`/api/travel-time?fromLat=${spotA.lat}&fromLng=${spotA.lng}&toLat=${spotB.lat}&toLng=${spotB.lng}`)
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [spotA.lat, spotA.lng, spotB.lat, spotB.lng]);
+
+  const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${spotA.lat},${spotA.lng}&destination=${spotB.lat},${spotB.lng}&travelmode=transit`;
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-gray-900">移動時間</h3>
+        {data?.distanceKm != null && (
+          <span className="text-xs text-gray-400">直線距離 約 {data.distanceKm}km</span>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => <div key={i} className="h-8 animate-pulse rounded-xl bg-gray-100" />)}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {[
+            { icon: <Train className="size-4 text-blue-500" />,          label: "電車",   val: data?.transit },
+            { icon: <Car   className="size-4 text-gray-600" />,          label: "車",     val: data?.driving },
+            { icon: <PersonStanding className="size-4 text-green-600" />, label: "徒歩",   val: data?.walking },
+          ].map(({ icon, label, val }) => (
+            <div key={label} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+              <div className="flex items-center gap-2">
+                {icon}
+                <span className="text-xs font-semibold text-gray-600">{label}</span>
+              </div>
+              {val ? (
+                <div className="text-right">
+                  <span className="text-sm font-bold text-gray-900">{val.duration}</span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400">ルートなし</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <a
+        href={dirUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-xs font-bold text-white hover:bg-blue-600"
+      >
+        <Navigation className="size-3.5" />
+        Googleマップでルートを見る
+      </a>
+    </div>
+  );
+}
+
 // ── メイン ──
 export default function CompareClient() {
   const [spots, setSpots] = useState<SpotCard[]>([]);
@@ -212,6 +280,8 @@ export default function CompareClient() {
         </div>
 
         {canCompare ? (
+          <div className="space-y-3">
+          <TravelTimePanel spotA={spotA} spotB={spotB} />
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-5">
             <div className="grid grid-cols-[1fr_24px_1fr] items-center gap-2 text-center text-[10px] font-bold text-gray-400">
               <span className="truncate text-gray-700">{spotA.location_name}</span>
@@ -238,6 +308,7 @@ export default function CompareClient() {
                 Bの詳細を見る
               </Link>
             </div>
+          </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
