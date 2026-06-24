@@ -71,7 +71,27 @@ function bookingUrl(place: NearbyPlace, category: string): { href: string; label
   return null;
 }
 
-// ── プレイスカード ──
+// ── カテゴリ別の背景色 ──
+const CATEGORY_BG: Record<string, string> = {
+  food:        "bg-orange-50",
+  cafe:        "bg-amber-50",
+  lodging:     "bg-rose-50",
+  sightseeing: "bg-blue-50",
+};
+const CATEGORY_ICON_COLOR: Record<string, string> = {
+  food:        "text-orange-400",
+  cafe:        "text-amber-500",
+  lodging:     "text-rose-400",
+  sightseeing: "text-blue-400",
+};
+const CATEGORY_ICON: Record<string, React.ReactNode> = {
+  food:        <Utensils className="size-6" />,
+  cafe:        <Coffee   className="size-6" />,
+  lodging:     <Hotel    className="size-6" />,
+  sightseeing: <Landmark className="size-6" />,
+};
+
+// ── プレイスカード（横長） ──
 function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; spotLat: number; spotLng: number; category: string }) {
   const dist = calcDistance(spotLat, spotLng, place.lat, place.lng);
   const distLabel = dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(1)}km`;
@@ -80,64 +100,77 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
   const booking = bookingUrl(place, category);
 
   return (
-    <div className="flex w-44 shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-      {/* 画像（詳細リンク） */}
-      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="relative block h-28 w-full bg-gray-100">
+    <div className="flex overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {/* 画像エリア（正方形・固定） */}
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="relative block size-24 shrink-0">
         {place.photo_ref ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl(place.photo_ref)} alt={place.name} className="h-full w-full object-cover" />
+          <img src={photoUrl(place.photo_ref)} alt={place.name} className="size-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="size-6 text-gray-300" />
+          <div className={`flex size-full items-center justify-center ${CATEGORY_BG[category] ?? "bg-gray-50"}`}>
+            <span className={CATEGORY_ICON_COLOR[category] ?? "text-gray-300"}>
+              {CATEGORY_ICON[category]}
+            </span>
           </div>
         )}
-
-        {/* 距離バッジ（左上） */}
-        <span className="absolute left-1.5 top-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+        {/* 距離バッジ */}
+        <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
           {distLabel}
         </span>
-
-        {/* 営業中バッジ（右上） */}
-        {place.open_now != null && (
-          <span className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-            place.open_now ? "bg-green-500 text-white" : "bg-gray-500 text-white"
-          }`}>
-            {place.open_now ? "営業中" : "営業時間外"}
-          </span>
-        )}
       </a>
 
-      {/* 情報 */}
-      <div className="flex flex-1 flex-col gap-1 p-2">
-        <p className="line-clamp-2 text-[11px] font-bold leading-tight text-gray-900">{place.name}</p>
-        <RatingStars rating={place.rating} count={place.user_ratings_total} />
-        {place.vicinity && (
-          <p className="line-clamp-1 text-[9px] text-gray-400">{place.vicinity}</p>
-        )}
-        <div className="mt-0.5">
-          <PriceLevel level={place.price_level} />
+      {/* 情報エリア */}
+      <div className="flex min-w-0 flex-1 flex-col justify-between p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-gray-900">{place.name}</p>
+            <div className="mt-0.5 flex items-center gap-2">
+              <RatingStars rating={place.rating} count={place.user_ratings_total} />
+              <PriceLevel level={place.price_level} />
+            </div>
+            {place.vicinity && (
+              <p className="mt-0.5 truncate text-[10px] text-gray-400">{place.vicinity}</p>
+            )}
+          </div>
+          {place.open_now != null && (
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+              place.open_now ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+            }`}>
+              {place.open_now ? "営業中" : "営業時間外"}
+            </span>
+          )}
         </div>
 
         {/* アクションボタン */}
-        <div className="mt-auto flex gap-1 pt-1.5">
+        <div className="mt-2 flex gap-1.5">
           <a
             href={dirUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-1 items-center justify-center gap-0.5 rounded-lg bg-gray-100 py-1 text-[9px] font-bold text-gray-600 hover:bg-gray-200"
+            className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200"
           >
-            <Navigation className="size-2.5" />
+            <Navigation className="size-3" />
             ルート
           </a>
-          {booking && (
+          {booking ? (
             <a
               href={booking.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-0.5 rounded-lg bg-[#E53935] py-1 text-[9px] font-bold text-white hover:bg-[#D32F2F]"
+              className="flex items-center gap-1 rounded-lg bg-[#E53935] px-3 py-1.5 text-[11px] font-bold text-white hover:bg-[#D32F2F]"
             >
-              <ExternalLink className="size-2.5" />
+              <ExternalLink className="size-3" />
               {booking.label}
+            </a>
+          ) : (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200"
+            >
+              <ExternalLink className="size-3" />
+              Googleで見る
             </a>
           )}
         </div>
@@ -149,13 +182,14 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
 // ── スケルトン ──
 function Skeleton() {
   return (
-    <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="w-40 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="h-24 animate-pulse bg-gray-200" />
-          <div className="p-2 space-y-1.5">
-            <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
-            <div className="h-2.5 w-1/2 animate-pulse rounded bg-gray-200" />
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="size-24 shrink-0 animate-pulse bg-gray-200" />
+          <div className="flex-1 p-3 space-y-2">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+            <div className="h-3 w-1/3 animate-pulse rounded bg-gray-200" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200" />
           </div>
         </div>
       ))}
@@ -229,7 +263,7 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
           <p className="text-sm text-gray-400">周辺に該当する施設が見つかりません</p>
         </div>
       ) : (
-        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-none pb-2">
+        <div ref={scrollRef} className="flex flex-col gap-2">
           {places.map((place) => (
             <PlaceCard key={place.place_id} place={place} spotLat={lat} spotLng={lng} category={activeCategory} />
           ))}
