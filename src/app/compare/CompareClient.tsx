@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SpotThumbnail from "@/components/SpotThumbnail";
 import { Search, X, MapPin, Train, ArrowLeftRight, Car, PersonStanding, Navigation } from "lucide-react";
@@ -231,6 +232,8 @@ export default function CompareClient() {
   const [spots, setSpots] = useState<SpotCard[]>([]);
   const [spotA, setSpotA] = useState<SelectedSpot>(null);
   const [spotB, setSpotB] = useState<SelectedSpot>(null);
+  const searchParams = useSearchParams();
+  const presetApplied = useRef(false);
 
   // 検索用に全件を名前順で取得（1ページ目を超える場合は追加ロード）
   useEffect(() => {
@@ -252,6 +255,16 @@ export default function CompareClient() {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  // ?a= パラメータでスポットAを自動セット
+  useEffect(() => {
+    if (presetApplied.current || spots.length === 0) return;
+    const aId = searchParams.get("a");
+    if (aId) {
+      const found = spots.find((s) => String(s.id) === aId);
+      if (found) { setSpotA(found); presetApplied.current = true; }
+    }
+  }, [spots, searchParams]);
 
   const canCompare = spotA && spotB;
 

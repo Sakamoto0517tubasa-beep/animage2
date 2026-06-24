@@ -311,6 +311,9 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ScoreBadge score={spot.overall_score} reviewCount={spot.review_count} size="sm" />
+            <Button asChild size="sm" variant="outline" className="h-8 rounded-xl px-3 text-xs border-gray-200 text-gray-600">
+              <Link href={`/compare?a=${spot.id}`}>比較</Link>
+            </Button>
             <Button asChild size="sm" className="h-8 rounded-xl bg-[#E53935] px-3 text-xs hover:bg-[#D32F2F]">
               <Link href={`/spots/${spot.id}`}>詳細</Link>
             </Button>
