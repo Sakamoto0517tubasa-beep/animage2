@@ -32,6 +32,9 @@ export default function LanguageSwitcher() {
 
   useEffect(() => {
     setCurrent(getCurrentLang());
+  }, []);
+
+  function loadTranslateScript() {
     if (initialized.current) return;
     initialized.current = true;
 
@@ -51,7 +54,7 @@ export default function LanguageSwitcher() {
       s.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       document.body.appendChild(s);
     }
-  }, []);
+  }
 
   function setLang(code: string) {
     const host = location.hostname;
@@ -79,7 +82,7 @@ export default function LanguageSwitcher() {
 
       <div className="notranslate fixed right-2 top-2 z-[60]" translate="no">
         <button
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => { loadTranslateScript(); setOpen((o) => !o); }}
           className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-sm active:bg-black/60"
           aria-label="言語を選択"
         >
