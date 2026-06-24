@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Star, MapPin, Utensils, Landmark, Coffee, Hotel, Navigation, ExternalLink } from "lucide-react";
+import { Star, MapPin, Utensils, Landmark, Coffee, Hotel, Navigation, ExternalLink, ShoppingBag } from "lucide-react";
 import type { NearbyPlace } from "@/app/api/nearby/route";
 
 // ── 距離計算（m） ──
@@ -46,10 +46,11 @@ function photoUrl(ref: string): string {
 // ── カテゴリ定義 ──
 type Category = { key: string; label: string; icon: React.ReactNode; color: string };
 const CATEGORIES: Category[] = [
-  { key: "food",        label: "飲食店",   icon: <Utensils className="size-3.5" />, color: "text-orange-500" },
-  { key: "cafe",        label: "カフェ",   icon: <Coffee   className="size-3.5" />, color: "text-amber-600" },
-  { key: "lodging",     label: "宿泊",     icon: <Hotel    className="size-3.5" />, color: "text-rose-500" },
-  { key: "sightseeing", label: "観光",     icon: <Landmark className="size-3.5" />, color: "text-blue-500" },
+  { key: "food",        label: "飲食店",   icon: <Utensils    className="size-3.5" />, color: "text-orange-500" },
+  { key: "cafe",        label: "カフェ",   icon: <Coffee      className="size-3.5" />, color: "text-amber-600" },
+  { key: "convenience", label: "コンビニ", icon: <ShoppingBag className="size-3.5" />, color: "text-green-600" },
+  { key: "lodging",     label: "宿泊",     icon: <Hotel       className="size-3.5" />, color: "text-rose-500" },
+  { key: "sightseeing", label: "観光",     icon: <Landmark    className="size-3.5" />, color: "text-blue-500" },
 ];
 
 // ── 予約・送客リンク（将来ここをアフィリエイトリンクに差し替え）──
@@ -75,20 +76,23 @@ function bookingUrl(place: NearbyPlace, category: string): { href: string; label
 const CATEGORY_BG: Record<string, string> = {
   food:        "bg-orange-50",
   cafe:        "bg-amber-50",
+  convenience: "bg-green-50",
   lodging:     "bg-rose-50",
   sightseeing: "bg-blue-50",
 };
 const CATEGORY_ICON_COLOR: Record<string, string> = {
   food:        "text-orange-400",
   cafe:        "text-amber-500",
+  convenience: "text-green-600",
   lodging:     "text-rose-400",
   sightseeing: "text-blue-400",
 };
 const CATEGORY_ICON: Record<string, React.ReactNode> = {
-  food:        <Utensils className="size-6" />,
-  cafe:        <Coffee   className="size-6" />,
-  lodging:     <Hotel    className="size-6" />,
-  sightseeing: <Landmark className="size-6" />,
+  food:        <Utensils    className="size-6" />,
+  cafe:        <Coffee      className="size-6" />,
+  convenience: <ShoppingBag className="size-6" />,
+  lodging:     <Hotel       className="size-6" />,
+  sightseeing: <Landmark    className="size-6" />,
 };
 
 // ── プレイスカード（横長） ──

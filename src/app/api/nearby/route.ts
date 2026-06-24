@@ -30,8 +30,9 @@ export async function GET(req: NextRequest) {
   const typeMap: Record<string, string> = {
     food:        "restaurant",
     cafe:        "cafe",
-    sightseeing: "tourist_attraction",
+    convenience: "convenience_store",
     lodging:     "lodging",
+    sightseeing: "tourist_attraction",
   };
   const type = typeMap[category] ?? "restaurant";
 
