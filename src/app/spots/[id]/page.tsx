@@ -144,7 +144,12 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
 
         {/* 総合スコア ＋ アクションボタン */}
         <div className="mt-4 flex items-center gap-2">
-          <ScoreBadge score={scores.overall} reviewCount={reviewCount} size="lg" />
+          <div className="flex shrink-0 flex-col items-center gap-0.5">
+            <ScoreBadge score={scores.overall} reviewCount={reviewCount} size="lg" />
+            {reviewCount > 0 && (
+              <span className="text-[10px] text-gray-400">{reviewCount}件</span>
+            )}
+          </div>
           <Button
             asChild
             variant="outline"
