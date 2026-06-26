@@ -27,14 +27,28 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   // 全件マーカー読み込み
   useEffect(() => {
     fetch("/api/spots/markers")
-      .then((r) => r.json())
-      .then((data: SpotWithStats[]) => {
+      .then(async (r) => {
+        const text = await r.text();
+        let data: SpotWithStats[];
+        try {
+          data = JSON.parse(text);
+        } catch {
+          console.error("[markers] JSON parse error:", text.slice(0, 200));
+          setLoading(false);
+          return;
+        }
+        if (!Array.isArray(data)) {
+          console.error("[markers] not array:", JSON.stringify(data).slice(0, 200));
+          setLoading(false);
+          return;
+        }
+        console.log("[markers] loaded", data.length, "spots");
         allSpotsRef.current = data;
         setAllSpots(data);
         setFilteredSpots(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e) => { console.error("[markers] fetch error:", e); setLoading(false); });
   }, []);
 
   // 検索・フィルタ変更時: テキスト検索はAPIへ、アニメ/エリアはクライアントで
