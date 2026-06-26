@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
 import SpotsMap from "@/components/SpotsMap";
 import type { SpotWithStats } from "@/types/supabase";
@@ -14,6 +14,14 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const [loading, setLoading] = useState(true);
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState(query);
+  const [debouncedSearch, setDebouncedSearch] = useState(query);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchText(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setDebouncedSearch(value), 300);
+  }, []);
 
   useEffect(() => {
     fetch("/api/spots/markers")
@@ -51,8 +59,8 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const filteredSpots = useMemo(() => {
     let result = spots;
 
-    if (searchText.trim()) {
-      const q = searchText.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       result = result.filter(
         (s) =>
           s.location_name.toLowerCase().includes(q) ||
@@ -72,7 +80,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
     }
 
     return result;
-  }, [spots, searchText, selectedAnime, selectedCity]);
+  }, [spots, debouncedSearch, selectedAnime, selectedCity]);
 
   const handleSelectSpot = useCallback((id: string | null) => {
     setSelectedSpotId(id);
@@ -80,6 +88,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
 
   const clearFilters = useCallback(() => {
     setSearchText("");
+    setDebouncedSearch("");
     setSelectedAnime(null);
     setSelectedCity(null);
   }, []);
@@ -120,14 +129,14 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
           <input
             type="text"
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="聖地・アニメ名で検索..."
             className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-4 text-sm shadow-md focus:border-[#E53935] focus:outline-none"
           />
           {searchText && (
             <button
               type="button"
-              onClick={() => setSearchText("")}
+              onClick={() => { setSearchText(""); setDebouncedSearch(""); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="size-4" />
