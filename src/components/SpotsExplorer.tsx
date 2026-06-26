@@ -26,15 +26,22 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const [showAnimeFilter, setShowAnimeFilter] = useState(false);
   const [showCityFilter, setShowCityFilter] = useState(false);
 
+  const [animeSearch, setAnimeSearch] = useState("");
   const animeTitles = useMemo(() => {
-    const titles = new Set<string>();
+    const counts = new Map<string, number>();
     for (const spot of spots) {
       for (const title of spot.anime_title.split(" / ")) {
-        titles.add(title.trim());
+        const t = title.trim();
+        counts.set(t, (counts.get(t) ?? 0) + 1);
       }
     }
-    return Array.from(titles).sort((a, b) => a.localeCompare(b, "ja"));
-  }, [spots]);
+    const sorted = Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([t]) => t);
+    if (!animeSearch.trim()) return sorted.slice(0, 100);
+    const q = animeSearch.toLowerCase();
+    return sorted.filter((t) => t.toLowerCase().includes(q)).slice(0, 50);
+  }, [spots, animeSearch]);
 
   const cities = useMemo(() => {
     const citySet = new Set(spots.map((s) => s.city).filter(Boolean));
@@ -149,12 +156,24 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
           </button>
 
           {showAnimeFilter && (
-            <div className="absolute right-0 top-12 z-30 max-h-72 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+            <div className="absolute right-0 top-12 z-30 w-56 rounded-xl border border-gray-200 bg-white shadow-xl">
+              <div className="p-2 border-b border-gray-100">
+                <input
+                  type="text"
+                  value={animeSearch}
+                  onChange={(e) => setAnimeSearch(e.target.value)}
+                  placeholder="アニメ名で絞り込む"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs focus:outline-none focus:border-[#E53935]"
+                  autoFocus
+                />
+              </div>
+              <div className="max-h-60 overflow-y-auto">
               <button
                 type="button"
                 onClick={() => {
                   setSelectedAnime(null);
                   setShowAnimeFilter(false);
+                  setAnimeSearch("");
                 }}
                 className="w-full px-4 py-2.5 text-left text-sm text-gray-500 hover:bg-gray-50"
               >
@@ -167,6 +186,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                   onClick={() => {
                     setSelectedAnime(title);
                     setShowAnimeFilter(false);
+                    setAnimeSearch("");
                   }}
                   className={`w-full truncate px-4 py-2.5 text-left text-sm hover:bg-gray-50 ${
                     selectedAnime === title
@@ -177,6 +197,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                   {title}
                 </button>
               ))}
+              </div>
             </div>
           )}
         </div>
