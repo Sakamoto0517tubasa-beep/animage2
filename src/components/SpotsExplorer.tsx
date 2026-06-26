@@ -11,7 +11,7 @@ type SpotsExplorerProps = {
 
 export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const [allSpots, setAllSpots] = useState<SpotWithStats[]>([]);
-  const [filteredSpots, setFilteredSpots] = useState<SpotWithStats[]>([]);
+  const [searchResults, setSearchResults] = useState<SpotWithStats[] | null>(null); // nullなら全件
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
@@ -22,62 +22,44 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const [showCityFilter, setShowCityFilter] = useState(false);
   const [animeSearch, setAnimeSearch] = useState("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const allSpotsRef = useRef<SpotWithStats[]>([]);
 
   // 全件マーカー読み込み
   useEffect(() => {
     fetch("/api/spots/markers")
-      .then(async (r) => {
-        const text = await r.text();
-        let data: SpotWithStats[];
-        try {
-          data = JSON.parse(text);
-        } catch {
-          console.error("[markers] JSON parse error:", text.slice(0, 200));
-          setLoading(false);
-          return;
-        }
-        if (!Array.isArray(data)) {
-          console.error("[markers] not array:", JSON.stringify(data).slice(0, 200));
-          setLoading(false);
-          return;
-        }
-        console.log("[markers] loaded", data.length, "spots");
-        allSpotsRef.current = data;
-        setAllSpots(data);
-        setFilteredSpots(data);
+      .then((r) => r.json())
+      .then((data: SpotWithStats[]) => {
+        if (Array.isArray(data)) setAllSpots(data);
         setLoading(false);
       })
-      .catch((e) => { console.error("[markers] fetch error:", e); setLoading(false); });
+      .catch(() => setLoading(false));
   }, []);
 
-  // 検索・フィルタ変更時: テキスト検索はAPIへ、アニメ/エリアはクライアントで
+  // テキスト検索変更時のみAPIへ（アニメ/エリアはuseMemoで処理）
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    const q = searchText.trim();
+    if (!q) { setSearchResults(null); return; }
     debounceTimer.current = setTimeout(async () => {
-      const q = searchText.trim();
-      let base: SpotWithStats[];
-      if (q) {
-        setSearching(true);
-        try {
-          const params = new URLSearchParams({ q, limit: "200" });
-          const res = await fetch(`/api/spots/markers?${params}`);
-          base = res.ok ? await res.json() : allSpotsRef.current;
-        } catch {
-          base = allSpotsRef.current;
-        } finally {
-          setSearching(false);
-        }
-      } else {
-        base = allSpotsRef.current;
+      setSearching(true);
+      try {
+        const res = await fetch(`/api/spots/markers?q=${encodeURIComponent(q)}&limit=200`);
+        const data = res.ok ? await res.json() : null;
+        setSearchResults(Array.isArray(data) ? data : null);
+      } catch {
+        setSearchResults(null);
+      } finally {
+        setSearching(false);
       }
-      let result = base;
-      if (selectedAnime) result = result.filter((s) => s.anime_title.split(" / ").some((t) => t.trim() === selectedAnime));
-      if (selectedCity) result = result.filter((s) => s.city === selectedCity);
-      setFilteredSpots(result);
     }, 400);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText, selectedAnime, selectedCity]);
+  }, [searchText]);
+
+  // filteredSpots: useMemoでallSpots/searchResultsから導出（stale closureなし）
+  const filteredSpots = useMemo(() => {
+    let base = searchResults ?? allSpots;
+    if (selectedAnime) base = base.filter((s) => s.anime_title.split(" / ").some((t) => t.trim() === selectedAnime));
+    if (selectedCity) base = base.filter((s) => s.city === selectedCity);
+    return base;
+  }, [allSpots, searchResults, selectedAnime, selectedCity]);
 
   const spots = filteredSpots;
 
