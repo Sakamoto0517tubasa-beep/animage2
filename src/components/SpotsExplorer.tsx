@@ -22,12 +22,18 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
   const [showCityFilter, setShowCityFilter] = useState(false);
   const [animeSearch, setAnimeSearch] = useState("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const allSpotsRef = useRef<SpotWithStats[]>([]);
 
   // 全件マーカー読み込み
   useEffect(() => {
     fetch("/api/spots/markers")
       .then((r) => r.json())
-      .then((data) => { setAllSpots(data); setFilteredSpots(data); setLoading(false); })
+      .then((data: SpotWithStats[]) => {
+        allSpotsRef.current = data;
+        setAllSpots(data);
+        setFilteredSpots(data);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -42,14 +48,14 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
         try {
           const params = new URLSearchParams({ q, limit: "200" });
           const res = await fetch(`/api/spots/markers?${params}`);
-          base = res.ok ? await res.json() : allSpots;
+          base = res.ok ? await res.json() : allSpotsRef.current;
         } catch {
-          base = allSpots;
+          base = allSpotsRef.current;
         } finally {
           setSearching(false);
         }
       } else {
-        base = allSpots;
+        base = allSpotsRef.current;
       }
       let result = base;
       if (selectedAnime) result = result.filter((s) => s.anime_title.split(" / ").some((t) => t.trim() === selectedAnime));
