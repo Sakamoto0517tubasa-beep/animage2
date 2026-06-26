@@ -1,13 +1,27 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getSpotsForMarkers } from "@/lib/spots";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl;
+  const q = (searchParams.get("q") ?? "").trim().toLowerCase();
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "0", 10) || 0, 500);
+
   const markers = await getSpotsForMarkers();
-  // 地図の点・検索・フィルタに必要な最小フィールドだけ返す
-  // （サムネURL・スコアはクリック時に /api/spots/[id] で取得するので除外）
-  const slim = markers.map((m) => ({
+
+  let result = markers;
+  if (q) {
+    result = markers.filter(
+      (m) =>
+        m.location_name.toLowerCase().includes(q) ||
+        m.anime_title.toLowerCase().includes(q) ||
+        false,
+    );
+  }
+  if (limit > 0) result = result.slice(0, limit);
+
+  const slim = result.map((m) => ({
     id: m.id,
     lat: m.lat,
     lng: m.lng,
@@ -16,6 +30,7 @@ export async function GET() {
     city: m.city,
     train_minutes: m.train_minutes,
   }));
+
   return NextResponse.json(slim, {
     headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" },
   });

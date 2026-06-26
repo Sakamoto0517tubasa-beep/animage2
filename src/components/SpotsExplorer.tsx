@@ -10,77 +10,77 @@ type SpotsExplorerProps = {
 };
 
 export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
-  const [spots, setSpots] = useState<SpotWithStats[]>([]);
+  const [allSpots, setAllSpots] = useState<SpotWithStats[]>([]);
+  const [filteredSpots, setFilteredSpots] = useState<SpotWithStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState(query);
-  const [debouncedSearch, setDebouncedSearch] = useState(query);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchText(value);
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => setDebouncedSearch(value), 300);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/spots/markers")
-      .then((r) => r.json())
-      .then((data) => { setSpots(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
   const [selectedAnime, setSelectedAnime] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [showAnimeFilter, setShowAnimeFilter] = useState(false);
   const [showCityFilter, setShowCityFilter] = useState(false);
-
   const [animeSearch, setAnimeSearch] = useState("");
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 全件マーカー読み込み
+  useEffect(() => {
+    fetch("/api/spots/markers")
+      .then((r) => r.json())
+      .then((data) => { setAllSpots(data); setFilteredSpots(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // 検索・フィルタ変更時: テキスト検索はAPIへ、アニメ/エリアはクライアントで
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      const q = searchText.trim();
+      let base: SpotWithStats[];
+      if (q) {
+        setSearching(true);
+        try {
+          const params = new URLSearchParams({ q, limit: "200" });
+          const res = await fetch(`/api/spots/markers?${params}`);
+          base = res.ok ? await res.json() : allSpots;
+        } catch {
+          base = allSpots;
+        } finally {
+          setSearching(false);
+        }
+      } else {
+        base = allSpots;
+      }
+      let result = base;
+      if (selectedAnime) result = result.filter((s) => s.anime_title.split(" / ").some((t) => t.trim() === selectedAnime));
+      if (selectedCity) result = result.filter((s) => s.city === selectedCity);
+      setFilteredSpots(result);
+    }, 400);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, selectedAnime, selectedCity]);
+
+  const spots = filteredSpots;
+
   const animeTitles = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const spot of spots) {
+    for (const spot of allSpots) {
       for (const title of spot.anime_title.split(" / ")) {
         const t = title.trim();
         counts.set(t, (counts.get(t) ?? 0) + 1);
       }
     }
-    const sorted = Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([t]) => t);
+    const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([t]) => t);
     if (!animeSearch.trim()) return sorted.slice(0, 100);
     const q = animeSearch.toLowerCase();
     return sorted.filter((t) => t.toLowerCase().includes(q)).slice(0, 50);
-  }, [spots, animeSearch]);
+  }, [allSpots, animeSearch]);
 
   const cities = useMemo(() => {
-    const citySet = new Set(spots.map((s) => s.city).filter(Boolean));
+    const citySet = new Set(allSpots.map((s) => s.city).filter(Boolean));
     return Array.from(citySet).filter((c): c is string => !!c).sort((a, b) => a.localeCompare(b));
-  }, [spots]);
+  }, [allSpots]);
 
-  const filteredSpots = useMemo(() => {
-    let result = spots;
-
-    if (debouncedSearch.trim()) {
-      const q = debouncedSearch.trim().toLowerCase();
-      result = result.filter(
-        (s) =>
-          s.location_name.toLowerCase().includes(q) ||
-          s.anime_title.toLowerCase().includes(q) ||
-          s.address.toLowerCase().includes(q),
-      );
-    }
-
-    if (selectedAnime) {
-      result = result.filter((s) =>
-        s.anime_title.split(" / ").some((t) => t.trim() === selectedAnime),
-      );
-    }
-
-    if (selectedCity) {
-      result = result.filter((s) => s.city === selectedCity);
-    }
-
-    return result;
-  }, [spots, debouncedSearch, selectedAnime, selectedCity]);
+  const hasActiveFilter = searchText.trim() || selectedAnime || selectedCity;
 
   const handleSelectSpot = useCallback((id: string | null) => {
     setSelectedSpotId(id);
@@ -88,12 +88,9 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
 
   const clearFilters = useCallback(() => {
     setSearchText("");
-    setDebouncedSearch("");
     setSelectedAnime(null);
     setSelectedCity(null);
   }, []);
-
-  const hasActiveFilter = searchText.trim() || selectedAnime || selectedCity;
 
   if (loading) {
     return (
@@ -129,14 +126,14 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
           <input
             type="text"
             value={searchText}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearchText(e.target.value)}
             placeholder="聖地・アニメ名で検索..."
             className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-4 text-sm shadow-md focus:border-[#E53935] focus:outline-none"
           />
           {searchText && (
             <button
               type="button"
-              onClick={() => { setSearchText(""); setDebouncedSearch(""); }}
+              onClick={() => setSearchText("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="size-4" />
