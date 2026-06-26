@@ -42,12 +42,20 @@ async function getCachedReviewAggregates(): Promise<RawReview[]> {
   const now = Date.now();
   if (reviewsCache && now - reviewsCache.at < REVIEWS_TTL) return reviewsCache.data;
   const supabase = createAdminSupabaseClient();
-  const { data } = await supabase
-    .from("reviews")
-    .select("spot_id,score_overall,score_reenactment,score_accessibility,score_photo,score_crowding");
-  const result = (data ?? []) as unknown as RawReview[];
-  reviewsCache = { data: result, at: now };
-  return result;
+  const allReviews: RawReview[] = [];
+  const BATCH = 1000;
+  for (let offset = 0; ; offset += BATCH) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("reviews")
+      .select("spot_id,score_overall,score_reenactment,score_accessibility,score_photo,score_crowding")
+      .range(offset, offset + BATCH - 1);
+    if (error || !data?.length) break;
+    allReviews.push(...(data as RawReview[]));
+    if (data.length < BATCH) break;
+  }
+  reviewsCache = { data: allReviews, at: now };
+  return allReviews;
 }
 
 const PAGE_SIZE = 50;
