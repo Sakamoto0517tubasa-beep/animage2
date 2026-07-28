@@ -20,10 +20,9 @@ export function getSpotStreetViewUrl(
   }
 
   const params = new URLSearchParams({
-    size: "640x480", // Street View Static の最大サイズ（高画質）
+    size: "640x480",
     location: `${lat},${lng}`,
     fov: "80",
-    return_error_code: "true",
     key: apiKey,
   });
 
