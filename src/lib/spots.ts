@@ -147,10 +147,35 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
     if (isLastWave) break;
   }
 
+  // レビュー集計を一括取得（spot_idごとのcount + avg）
+  const reviewMap = new Map<string, { count: number; score: number }>();
+  try {
+    const REVIEW_BATCH = 1000;
+    for (let offset = 0; ; offset += REVIEW_BATCH) {
+      const { data: agg, error: aggErr } = await supabase
+        .from("reviews")
+        .select("spot_id, score_overall")
+        .order("spot_id")
+        .range(offset, offset + REVIEW_BATCH - 1);
+      if (aggErr || !agg?.length) break;
+      for (const r of agg) {
+        const entry = reviewMap.get(r.spot_id);
+        if (entry) {
+          entry.count += 1;
+          entry.score += (r.score_overall ?? 0);
+        } else {
+          reviewMap.set(r.spot_id, { count: 1, score: r.score_overall ?? 0 });
+        }
+      }
+      if (agg.length < REVIEW_BATCH) break;
+    }
+  } catch { /* レビュー取得失敗時はスコアなしで続行 */ }
+
   const all: SpotMarker[] = rawAll.map((s) => {
     const seed = SEED_SPOT_BY_ID.get(s.id);
     const lat = seed?.lat ?? s.lat;
     const lng = seed?.lng ?? s.lng;
+    const review = reviewMap.get(s.id);
     return {
       id: s.id,
       lat,
@@ -161,8 +186,8 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
       train_minutes: seed?.train_minutes ?? s.train_minutes ?? null,
       thumbnail_url: getSpotThumbnailUrl(lat, lng, null),
       thumbnail_fallback_url: null,
-      overall_score: null,
-      review_count: 0,
+      overall_score: review ? Math.round((review.score / review.count) * 10) / 10 : null,
+      review_count: review?.count ?? 0,
     };
   });
 
