@@ -33,6 +33,6 @@ export async function GET(req: Request) {
   }));
 
   return NextResponse.json(slim, {
-    headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" },
+    headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });
 }
