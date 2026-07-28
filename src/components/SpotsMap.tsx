@@ -267,16 +267,34 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
 
   const streetViewUrl = src.thumbnail_url?.includes("maps.googleapis.com")
     ? src.thumbnail_url : null;
+  const fallbackUrl = src.thumbnail_fallback_url ?? null;
+  const imageUrl = streetViewUrl ?? fallbackUrl;
+  const [imgSrc, setImgSrc] = useState<string | null>(imageUrl);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(streetViewUrl ?? fallbackUrl);
+    setImgError(false);
+  }, [streetViewUrl, fallbackUrl]);
+
+  const handleImageError = useCallback(() => {
+    if (!imgError && fallbackUrl && imgSrc !== fallbackUrl) {
+      setImgSrc(fallbackUrl);
+      setImgError(true);
+    } else {
+      setImgSrc(null);
+    }
+  }, [imgError, fallbackUrl, imgSrc]);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 animate-in slide-in-from-bottom duration-300">
       <div className="mx-3 mb-4 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
         {/* 画像エリア */}
-        {streetViewUrl && (
+        {imgSrc && (
           <div className="relative h-36 w-full bg-gray-100">
             <div className="flex h-full">
               <div className="relative h-full flex-1 overflow-hidden">
-                <Image src={streetViewUrl} alt={spot.location_name} fill className="object-cover" sizes="200px" />
+                <Image src={imgSrc} alt={spot.location_name} fill className="object-cover" sizes="200px" onError={handleImageError} />
               </div>
             </div>
             {/* グラデーションオーバーレイ */}
@@ -295,7 +313,7 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
 
         {/* 情報行 */}
         <div className="flex items-center gap-3 px-4 py-3">
-          {!streetViewUrl && (
+          {!imgSrc && (
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-gray-900">{spot.location_name}</p>
               <p className="truncate text-xs text-[#E53935]">{spot.anime_title}</p>
@@ -318,7 +336,7 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
               <Link href={`/spots/${spot.id}`}>詳細</Link>
             </Button>
           </div>
-          {!streetViewUrl && (
+          {!imgSrc && (
             <button onClick={onClose} className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-100">
               <X className="size-4" />
             </button>
