@@ -265,9 +265,13 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
 
   const src = detail ?? spot;
 
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const streetViewUrl = src.thumbnail_url?.includes("maps.googleapis.com")
     ? src.thumbnail_url : null;
-  const fallbackUrl = src.thumbnail_fallback_url ?? null;
+  const satelliteUrl = apiKey
+    ? `https://maps.googleapis.com/maps/api/staticmap?center=${spot.lat},${spot.lng}&zoom=16&size=640x480&scale=2&maptype=satellite&markers=color:red|${spot.lat},${spot.lng}&key=${apiKey}`
+    : null;
+  const fallbackUrl = src.thumbnail_fallback_url ?? satelliteUrl;
   const imageUrl = streetViewUrl ?? fallbackUrl;
   const [imgSrc, setImgSrc] = useState<string | null>(imageUrl);
   const [imgError, setImgError] = useState(false);

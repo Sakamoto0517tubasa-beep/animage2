@@ -76,6 +76,8 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
     ? spot.thumbnail_url
     : null;
 
+  const satelliteUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${spot.lat},${spot.lng}&zoom=16&size=640x480&scale=2&maptype=satellite&markers=color:red|${spot.lat},${spot.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+
   // 構造化データ（観光地スキーマ + 評価）→ 検索結果のリッチ表示
   const jsonLd = {
     "@context": "https://schema.org",
@@ -107,7 +109,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       <SpotImagePanel
         animeImageUrl={null}
         streetViewUrl={streetViewUrl}
-        fallbackUrl={spot.thumbnail_fallback_url ?? null}
+        fallbackUrl={spot.thumbnail_fallback_url ?? satelliteUrl}
         locationName={spot.location_name}
       />
 
