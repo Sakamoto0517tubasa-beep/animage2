@@ -30,8 +30,6 @@ export async function GET(req: Request) {
     train_minutes: m.train_minutes,
     overall_score: m.overall_score,
     review_count: m.review_count,
-    thumbnail_url: m.thumbnail_url,
-    thumbnail_fallback_url: m.thumbnail_fallback_url,
   }));
 
   return NextResponse.json(slim, {
