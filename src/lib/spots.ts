@@ -4,19 +4,14 @@ import { getReviewAggregatesBySpotIds, type ReviewAggregate } from "@/lib/review
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SpotWithStats } from "@/types/supabase";
-import { findImageByCoord, findImageByTitle } from "@/lib/spot-cards";
 
 export { getSpotSatelliteThumbnailUrl, getSpotStreetViewUrl, getSpotThumbnailUrl } from "@/lib/spot-thumbnails";
 
 function applyThumbnail(spot: SpotWithStats): SpotWithStats {
-  const animeImage =
-    findImageByCoord(spot.lat, spot.lng) ??
-    findImageByTitle(spot.anime_title);
-
   return {
     ...spot,
-    thumbnail_fallback_url: animeImage,
-    thumbnail_url: getSpotThumbnailUrl(spot.lat, spot.lng, animeImage),
+    thumbnail_fallback_url: null,
+    thumbnail_url: getSpotThumbnailUrl(spot.lat, spot.lng, null),
   };
 }
 
@@ -156,10 +151,6 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
     const seed = SEED_SPOT_BY_ID.get(s.id);
     const lat = seed?.lat ?? s.lat;
     const lng = seed?.lng ?? s.lng;
-    const animeImage =
-      findImageByCoord(lat, lng) ??
-      findImageByTitle(seed?.anime_title ?? s.anime_title);
-
     return {
       id: s.id,
       lat,
@@ -168,8 +159,8 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
       anime_title: seed?.anime_title ?? s.anime_title,
       city: inferPrefecture(lat, lng),
       train_minutes: seed?.train_minutes ?? s.train_minutes ?? null,
-      thumbnail_url: getSpotThumbnailUrl(lat, lng, animeImage),
-      thumbnail_fallback_url: animeImage,
+      thumbnail_url: getSpotThumbnailUrl(lat, lng, null),
+      thumbnail_fallback_url: null,
       overall_score: null,
       review_count: 0,
     };

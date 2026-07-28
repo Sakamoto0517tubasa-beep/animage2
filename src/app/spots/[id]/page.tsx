@@ -108,7 +108,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       />
       <SpotImagePanel
         animeImageUrl={null}
-        streetViewUrl={spot.thumbnail_fallback_url ?? streetViewUrl}
+        streetViewUrl={streetViewUrl}
         fallbackUrl={satelliteUrl}
         locationName={spot.location_name}
       />

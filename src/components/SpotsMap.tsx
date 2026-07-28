@@ -271,7 +271,7 @@ function SpotInfoCard({ spot, onClose }: { spot: SpotWithStats; onClose: () => v
   const satelliteUrl = apiKey
     ? `https://maps.googleapis.com/maps/api/staticmap?center=${spot.lat},${spot.lng}&zoom=16&size=640x480&scale=2&maptype=satellite&markers=color:red|${spot.lat},${spot.lng}&key=${apiKey}`
     : null;
-  const fallbackUrl = src.thumbnail_fallback_url ?? satelliteUrl;
+  const fallbackUrl = satelliteUrl;
   const imageUrl = streetViewUrl ?? fallbackUrl;
   const [imgSrc, setImgSrc] = useState<string | null>(imageUrl);
   const [imgError, setImgError] = useState(false);
