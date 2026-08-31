@@ -56,16 +56,16 @@ const CATEGORIES: Category[] = [
 // ── 予約・送客リンク（将来ここをアフィリエイトリンクに差し替え）──
 function bookingUrl(place: NearbyPlace, category: string): { href: string; label: string } | null {
   if (category === "lodging") {
-    // 宿泊 → 楽天トラベルのキーワード検索（※アフィリエイトIDは後で付与）
     return {
-      href: `https://search.travel.rakuten.co.jp/ds/yado/list?f_keyword=${encodeURIComponent(place.name)}`,
+      href: `https://www.google.com/maps/search/${encodeURIComponent(place.name)}/@${place.lat},${place.lng},15z`,
       label: "宿を予約",
     };
   }
   if (category === "food" || category === "cafe") {
     // 飲食 → 食べログのキーワード検索（※アフィリエイトIDは後で付与）
+    const keyword = place.vicinity ? `${place.name} ${place.vicinity}` : place.name;
     return {
-      href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(place.name)}`,
+      href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(keyword)}`,
       label: "予約・口コミ",
     };
   }
