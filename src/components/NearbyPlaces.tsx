@@ -57,7 +57,7 @@ const CATEGORIES: Category[] = [
 function bookingUrl(place: NearbyPlace, category: string): { href: string; label: string } | null {
   if (category === "lodging") {
     return {
-      href: `https://www.google.com/maps/search/${encodeURIComponent(place.name)}/@${place.lat},${place.lng},15z`,
+      href: `https://www.jalan.net/yad_list/?kenCd=&distCd=&keyword=${encodeURIComponent(place.name)}`,
       label: "宿を予約",
     };
   }
