@@ -63,9 +63,8 @@ function bookingUrl(place: NearbyPlace, category: string): { href: string; label
   }
   if (category === "food" || category === "cafe") {
     // 飲食 → 食べログのキーワード検索（※アフィリエイトIDは後で付与）
-    const keyword = place.vicinity ? `${place.name} ${place.vicinity}` : place.name;
     return {
-      href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(keyword)}`,
+      href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(place.name)}`,
       label: "予約・口コミ",
     };
   }
