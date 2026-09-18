@@ -94,26 +94,9 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
     setSelectedCity(null);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden bg-gray-100">
-        {/* マップ背景スケルトン */}
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
-        {/* 検索バースケルトン */}
-        <div className="absolute left-3 right-3 top-3 flex gap-2">
-          <div className="h-10 flex-1 animate-pulse rounded-xl bg-white/80 shadow-md" />
-          <div className="h-10 w-20 animate-pulse rounded-xl bg-white/80 shadow-md" />
-          <div className="h-10 w-16 animate-pulse rounded-xl bg-white/80 shadow-md" />
-        </div>
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="text-sm font-medium text-gray-400">地図を読み込み中…</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative h-[calc(100dvh-4rem)] w-full">
+      {/* 地図は即描画し、マーカーは読み込めた分から順次表示（待ち時間に日本地図が見える） */}
       <SpotsMap
         spots={filteredSpots}
         selectedSpotId={selectedSpotId}
@@ -265,7 +248,14 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
       {/* Spot count + clear filters */}
       <div className="absolute left-3 top-[3.75rem] z-20 flex items-center gap-2">
         <div className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
-          {filteredSpots.length} 件
+          {loading && allSpots.length === 0 ? (
+            <span className="flex items-center gap-1.5">
+              <span className="size-1.5 animate-pulse rounded-full bg-[#E53935]" />
+              聖地を読み込み中…
+            </span>
+          ) : (
+            `${filteredSpots.length} 件`
+          )}
         </div>
         {hasActiveFilter && (
           <button
