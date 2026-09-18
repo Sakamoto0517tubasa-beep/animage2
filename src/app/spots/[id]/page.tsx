@@ -11,7 +11,7 @@ import PhotoGrid from "@/components/PhotoGrid";
 import ReviewCard from "@/components/ReviewCard";
 import ScoreBadge from "@/components/ScoreBadge";
 import ScorePanel from "@/components/ScorePanel";
-import SpotEmbedMap from "@/components/SpotEmbedMap";
+import SpotEmbedMapLazy from "@/components/SpotEmbedMapLazy";
 import SpotImagePanel from "@/components/SpotImagePanel";
 import RelatedSpots from "@/components/RelatedSpots";
 import NearbyPlacesLazy from "@/components/NearbyPlacesLazy";
@@ -189,7 +189,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
 
       {/* ── 地図 ── */}
       <div className="px-4 mt-5">
-        <SpotEmbedMap lat={spot.lat} lng={spot.lng} locationName={spot.location_name} />
+        <SpotEmbedMapLazy lat={spot.lat} lng={spot.lng} locationName={spot.location_name} />
       </div>
 
       {/* ── 写真 ── */}

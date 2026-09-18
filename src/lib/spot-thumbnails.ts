@@ -19,8 +19,9 @@ export function getSpotStreetViewUrl(
     return null;
   }
 
+  // カード表示は約200px幅。Retina対応で400pxあれば十分（元は640×480＝過大）
   const params = new URLSearchParams({
-    size: "640x480",
+    size: "400x300",
     location: `${lat},${lng}`,
     fov: "80",
     key: apiKey,
@@ -39,11 +40,11 @@ export function getSpotSatelliteThumbnailUrl(
     return null;
   }
 
+  // カード表示は約200px幅。400×300で十分（元は640×480×2倍＝実質1280×960で過大）
   const params = new URLSearchParams({
     center: `${lat},${lng}`,
     zoom: "16",
-    size: "640x480",
-    scale: "2", // 高解像度（Retina対応）
+    size: "400x300",
     maptype: "satellite",
     markers: `color:red|${lat},${lng}`,
     key: apiKey,
