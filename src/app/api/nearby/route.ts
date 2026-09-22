@@ -21,6 +21,19 @@ export type NearbyPlace = {
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 const RECRUIT_API_KEY = process.env.RECRUIT_API_KEY ?? "";
 
+// バリューコマース アフィリエイト（sid/pid 設定時のみ有効化。未設定なら直リンク）
+const VC_SID = process.env.VALUECOMMERCE_SID ?? "";
+const VC_PID = process.env.VALUECOMMERCE_PID_HOTPEPPER ?? "";
+
+// 店舗URLをアフィリエイトリンクで包む（MyLink形式）
+function affiliateWrap(url: string): string {
+  if (!VC_SID || !VC_PID) return url;
+  return (
+    `https://ck.jp.ap.valuecommerce.com/servlet/referral` +
+    `?sid=${VC_SID}&pid=${VC_PID}&vc_url=${encodeURIComponent(url)}`
+  );
+}
+
 function jsonWithCache(places: NearbyPlace[]) {
   return NextResponse.json(places, {
     headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" },
@@ -85,7 +98,7 @@ async function fetchFromHotpepper(
       open_now:           null,
       photo_ref:          null,
       photo_url:          s.photo?.pc?.m ?? s.photo?.pc?.l ?? s.photo?.pc?.s ?? null,
-      booking_url:        s.urls?.pc ?? null,
+      booking_url:        s.urls?.pc ? affiliateWrap(s.urls.pc) : null,
       source:             "hotpepper",
       budget:             s.budget?.name ?? null,
       types:              s.genre?.name ? [s.genre.name] : [],
