@@ -55,6 +55,10 @@ const CATEGORIES: Category[] = [
 
 // ── 予約・送客リンク（将来ここをアフィリエイトリンクに差し替え）──
 function bookingUrl(place: NearbyPlace, category: string): { href: string; label: string } | null {
+  // ホットペッパー等が正式な予約/詳細URLを持つ場合はそれを最優先（キーワード検索より確実）
+  if (place.booking_url) {
+    return { href: place.booking_url, label: "予約・詳細" };
+  }
   if (category === "lodging") {
     return {
       href: `https://www.booking.com/searchresults.ja.html?ss=${encodeURIComponent(place.name)}`,
@@ -98,17 +102,25 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
 function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; spotLat: number; spotLng: number; category: string }) {
   const dist = calcDistance(spotLat, spotLng, place.lat, place.lng);
   const distLabel = dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(1)}km`;
-  const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
-  const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}&destination_place_id=${place.place_id}`;
+  const isHotpepper = place.source === "hotpepper";
+  const imgUrl = place.photo_url ?? (place.photo_ref ? photoUrl(place.photo_ref) : null);
+  // 画像・「見る」リンク先：ホットペッパーは店舗ページ、Googleはマップ
+  const mapsUrl = isHotpepper && place.booking_url
+    ? place.booking_url
+    : `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
+  // ルート：Google由来のみ place_id を付与（ホットペッパーのidはGoogle用ではない）
+  const dirUrl = isHotpepper
+    ? `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}&destination_place_id=${place.place_id}`;
   const booking = bookingUrl(place, category);
 
   return (
     <div className="flex overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       {/* 画像エリア（正方形・固定） */}
       <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="relative block size-24 shrink-0">
-        {place.photo_ref ? (
+        {imgUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl(place.photo_ref)} alt={place.name} className="size-full object-cover" />
+          <img src={imgUrl} alt={place.name} className="size-full object-cover" />
         ) : (
           <div className={`flex size-full items-center justify-center ${CATEGORY_BG[category] ?? "bg-gray-50"}`}>
             <span className={CATEGORY_ICON_COLOR[category] ?? "text-gray-300"}>
@@ -128,7 +140,11 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-gray-900">{place.name}</p>
             <div className="mt-0.5 flex items-center gap-2">
-              <RatingStars rating={place.rating} count={place.user_ratings_total} />
+              {place.budget ? (
+                <span className="text-[10px] font-semibold text-gray-500">{place.budget}</span>
+              ) : (
+                <RatingStars rating={place.rating} count={place.user_ratings_total} />
+              )}
               <PriceLevel level={place.price_level} />
             </div>
             {place.vicinity && (
@@ -229,6 +245,7 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
   }, [activeCategory]);
 
   const places = cache[activeCategory] ?? [];
+  const usesHotpepper = places.some((p) => p.source === "hotpepper");
 
   return (
     <section className="mt-8 px-4">
@@ -273,7 +290,18 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
         </div>
       )}
 
-      <p className="mt-2 text-right text-[10px] text-gray-300">Powered by Google Places</p>
+      {usesHotpepper ? (
+        <a
+          href="http://webservice.recruit.co.jp/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 block text-right text-[10px] text-gray-300 hover:text-gray-400"
+        >
+          Powered by ホットペッパー グルメ
+        </a>
+      ) : (
+        <p className="mt-2 text-right text-[10px] text-gray-300">Powered by Google Places</p>
+      )}
     </section>
   );
 }
