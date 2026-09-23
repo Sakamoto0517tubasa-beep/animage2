@@ -12,6 +12,7 @@ import ReviewCard from "@/components/ReviewCard";
 import ScoreBadge from "@/components/ScoreBadge";
 import ScorePanel from "@/components/ScorePanel";
 import SpotEmbedMapLazy from "@/components/SpotEmbedMapLazy";
+import PilgrimageManners from "@/components/PilgrimageManners";
 import SpotImagePanel from "@/components/SpotImagePanel";
 import RelatedSpots from "@/components/RelatedSpots";
 import NearbyPlacesLazy from "@/components/NearbyPlacesLazy";
@@ -191,6 +192,9 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       <div className="px-4 mt-5">
         <SpotEmbedMapLazy lat={spot.lat} lng={spot.lng} locationName={spot.location_name} />
       </div>
+
+      {/* ── 聖地巡礼のマナー ── */}
+      <PilgrimageManners />
 
       {/* ── 写真 ── */}
       <section className="px-4 mt-8">
