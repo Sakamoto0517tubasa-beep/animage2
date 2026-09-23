@@ -13,6 +13,7 @@ import ScoreBadge from "@/components/ScoreBadge";
 import ScorePanel from "@/components/ScorePanel";
 import SpotEmbedMapLazy from "@/components/SpotEmbedMapLazy";
 import PilgrimageManners from "@/components/PilgrimageManners";
+import { deriveSpotCaution } from "@/lib/spot-caution";
 import SpotImagePanel from "@/components/SpotImagePanel";
 import RelatedSpots from "@/components/RelatedSpots";
 import NearbyPlacesLazy from "@/components/NearbyPlacesLazy";
@@ -194,7 +195,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       </div>
 
       {/* ── 聖地巡礼のマナー ── */}
-      <PilgrimageManners />
+      <PilgrimageManners caution={deriveSpotCaution(spot.location_name)} />
 
       {/* ── 写真 ── */}
       <section className="px-4 mt-8">
