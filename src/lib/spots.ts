@@ -3,6 +3,7 @@ import { getSpotThumbnailUrl } from "@/lib/spot-thumbnails";
 import { getReviewAggregatesBySpotIds, type ReviewAggregate } from "@/lib/reviews";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import type { SpotWithStats } from "@/types/supabase";
 
 export { getSpotSatelliteThumbnailUrl, getSpotStreetViewUrl, getSpotThumbnailUrl } from "@/lib/spot-thumbnails";
@@ -103,7 +104,8 @@ export async function getSpotsForMarkers(): Promise<SpotMarker[]> {
     return _markersCache;
   }
 
-  const supabase = await createServerSupabaseClient();
+  // Cookie非依存のadminクライアント（公開データ）→ 呼び出し元ページを静的化できる
+  const supabase = createAdminSupabaseClient();
   const BATCH_SIZE = 1000;
   const CONCURRENCY = 5; // 5並列で取得
   const TOTAL_ESTIMATE = 20000; // 最大件数の見積もり
@@ -378,7 +380,8 @@ export async function getSpotCount(): Promise<number> {
   if (!isSupabaseConfigured()) return SEED_SPOTS.length;
   // マーカーキャッシュが既にある場合はそれを使う
   if (_markersCache) return _markersCache.length;
-  const supabase = await createServerSupabaseClient();
+  // Cookie非依存のadminクライアント（公開カウント）→ 呼び出し元ページを静的化できる
+  const supabase = createAdminSupabaseClient();
   const { count } = await supabase
     .from("spots")
     .select("*", { count: "exact", head: true });
