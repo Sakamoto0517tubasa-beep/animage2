@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckCircle, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/";
+  const t = useT();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -34,8 +36,8 @@ export default function RegisterForm() {
     if (authError) {
       setError(
         authError.message.includes("already registered")
-          ? "このメールアドレスは既に登録されています"
-          : "登録に失敗しました。もう一度お試しください",
+          ? t("auth.emailTaken")
+          : t("auth.registerError"),
       );
       setLoading(false);
       return;
@@ -53,29 +55,29 @@ export default function RegisterForm() {
         <h1 className="font-cinzel text-3xl font-bold tracking-widest text-white">
           <span className="opacity-80">A</span>NIM<span className="opacity-80">A</span>GE
         </h1>
-        <p className="mt-2 text-sm text-white/70">アニメ聖地巡礼プラットフォーム</p>
+        <p className="mt-2 text-sm text-white/70">{t("auth.tagline")}</p>
       </div>
 
       {/* フォームカード */}
       <div className="flex flex-1 flex-col bg-gray-50 px-4 py-8">
         <div className="mx-auto w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900">新規登録</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t("header.register")}</h2>
           <p className="mt-1 text-sm text-gray-500">
-            アカウントを作成してレビューやお気に入りを記録しよう
+            {t("auth.registerSubtitle")}
           </p>
 
           {success ? (
             <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-8 text-center">
               <CheckCircle className="size-10 text-green-500" />
-              <p className="font-semibold text-green-800">登録が完了しました！</p>
-              <p className="text-sm text-green-600">確認メールをご確認ください</p>
+              <p className="font-semibold text-green-800">{t("auth.registerSuccess")}</p>
+              <p className="text-sm text-green-600">{t("auth.checkEmail")}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               {/* ユーザー名 */}
               <div>
                 <label htmlFor="username" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                  ユーザー名
+                  {t("auth.username")}
                 </label>
                 <div className="relative">
                   <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -87,7 +89,7 @@ export default function RegisterForm() {
                     required
                     minLength={2}
                     autoComplete="username"
-                    placeholder="ニックネームを入力"
+                    placeholder={t("auth.usernamePlaceholder")}
                     className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E53935] focus:bg-white focus:outline-none"
                   />
                 </div>
@@ -96,7 +98,7 @@ export default function RegisterForm() {
               {/* メールアドレス */}
               <div>
                 <label htmlFor="email" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                  メールアドレス
+                  {t("auth.email")}
                 </label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -116,7 +118,7 @@ export default function RegisterForm() {
               {/* パスワード */}
               <div>
                 <label htmlFor="password" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                  パスワード <span className="font-normal text-gray-400">（6文字以上）</span>
+                  {t("auth.password")} <span className="font-normal text-gray-400">{t("auth.passwordHint")}</span>
                 </label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -155,10 +157,10 @@ export default function RegisterForm() {
                 {loading ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    登録中...
+                    {t("auth.registering")}
                   </>
                 ) : (
-                  "アカウントを作成"
+                  t("auth.createAccount")
                 )}
               </button>
             </form>
@@ -166,12 +168,12 @@ export default function RegisterForm() {
 
           <div className="mt-6 border-t border-gray-100 pt-5 text-center">
             <p className="text-sm text-gray-500">
-              すでにアカウントをお持ちの方は{" "}
+              {t("auth.haveAccount")}{" "}
               <Link
                 href={`/auth/login${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
                 className="font-semibold text-[#E53935]"
               >
-                ログイン
+                {t("header.login")}
               </Link>
             </p>
           </div>

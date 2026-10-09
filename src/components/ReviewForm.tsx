@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
+import { useLang } from "@/components/i18n/LanguageProvider";
 import type { Spot } from "@/types/supabase";
 
 const MAX_PHOTOS = 3;
@@ -19,6 +20,7 @@ type ReviewFormProps = {
 
 export default function ReviewForm({ spot }: ReviewFormProps) {
   const router = useRouter();
+  const { t, tn } = useLang();
   const [nickname, setNickname] = useState("");
   const [scores, setScores] = useState({
     reenactment: 8,
@@ -44,7 +46,7 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
     const files = Array.from(e.target.files ?? []);
     const valid = files.filter((f) => {
       if (f.size > MAX_SIZE_MB * 1024 * 1024) {
-        setError(`${f.name} は${MAX_SIZE_MB}MB以上のため追加できません`);
+        setError(tn("review.errTooBig", { name: f.name, size: MAX_SIZE_MB }));
         return false;
       }
       return true;
@@ -94,7 +96,7 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
 
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        throw new Error((json as { error?: string }).error ?? "投稿に失敗しました");
+        throw new Error((json as { error?: string }).error ?? t("review.errSubmit"));
       }
 
       // 写真アップロード（任意・失敗しても続行）
@@ -140,7 +142,7 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "エラーが発生しました。もう一度お試しください。",
+          : t("common.errRetry"),
       );
     } finally {
       setSubmitting(false);
@@ -153,50 +155,50 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
         <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
           <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-500" />
           <p className="text-sm text-red-700">
-            Supabaseが設定されていません。環境変数を追加するとレビューを投稿できます。
+            {t("review.errNoSupabase")}
           </p>
         </div>
       )}
 
       <div>
         <label htmlFor="nickname" className="mb-2 block text-sm font-medium text-gray-700">
-          ニックネーム <span className="text-gray-400 font-normal text-xs">（任意）</span>
+          {t("review.nickname")} <span className="text-gray-400 font-normal text-xs">{t("review.optional")}</span>
         </label>
         <Input
           id="nickname"
           value={nickname}
           onChange={(event) => setNickname(event.target.value)}
-          placeholder="匿名"
+          placeholder={t("review.anonymous")}
           className="border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
         />
         <p className="mt-2 text-xs text-gray-400">
-          空欄の場合は匿名で投稿されます。
+          {t("review.anonymousHint")}
         </p>
       </div>
 
       <div className="space-y-6">
         <ScoreInput
-          label="再現度"
+          label={t("score.reenactment")}
           value={scores.reenactment}
           onChange={(value) => setScores((current) => ({ ...current, reenactment: value }))}
         />
         <ScoreInput
-          label="アクセス"
+          label={t("score.accessibility")}
           value={scores.accessibility}
           onChange={(value) => setScores((current) => ({ ...current, accessibility: value }))}
         />
         <ScoreInput
-          label="写真映え"
+          label={t("score.photo")}
           value={scores.photo}
           onChange={(value) => setScores((current) => ({ ...current, photo: value }))}
         />
         <ScoreInput
-          label="混雑度"
+          label={t("score.crowding")}
           value={scores.crowding}
           onChange={(value) => setScores((current) => ({ ...current, crowding: value }))}
         />
         <ScoreInput
-          label="総合"
+          label={t("score.overall")}
           value={scores.overall}
           onChange={(value) => setScores((current) => ({ ...current, overall: value }))}
         />
@@ -204,13 +206,13 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
 
       <div>
         <label htmlFor="comment" className="mb-2 block text-sm font-medium text-gray-700">
-          コメント <span className="text-gray-400 font-normal text-xs">（任意）</span>
+          {t("review.comment")} <span className="text-gray-400 font-normal text-xs">{t("review.optional")}</span>
         </label>
         <Textarea
           id="comment"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
-          placeholder="この聖地での体験を共有しよう...（省略可）"
+          placeholder={t("review.commentPlaceholder")}
           className="min-h-28 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
         />
       </div>
@@ -218,7 +220,7 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
       {/* 写真アップロード */}
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
-          写真 <span className="text-gray-400 font-normal text-xs">（任意・最大{MAX_PHOTOS}枚・{MAX_SIZE_MB}MB以下）</span>
+          {t("spot.photos")} <span className="text-gray-400 font-normal text-xs">{tn("review.photoHint", { max: MAX_PHOTOS, size: MAX_SIZE_MB })}</span>
         </label>
         <input
           ref={fileInputRef}
@@ -232,12 +234,12 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
           {previews.map((src, idx) => (
             <div key={idx} className="relative size-24 overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={`写真${idx + 1}`} className="h-full w-full object-cover" />
+              <img src={src} alt={tn("review.photoAlt", { n: idx + 1 })} className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removePhoto(idx)}
                 className="absolute right-1 top-1 rounded-full bg-black/50 p-0.5 text-white hover:bg-black/70"
-                aria-label="写真を削除"
+                aria-label={t("review.removePhoto")}
               >
                 <X className="size-3.5" />
               </button>
@@ -250,12 +252,12 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
               className="flex size-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-500"
             >
               <Camera className="size-5" />
-              <span className="text-xs">写真を追加</span>
+              <span className="text-xs">{t("review.addPhoto")}</span>
             </button>
           )}
         </div>
         {photoFiles.length > 0 && (
-          <p className="mt-1.5 text-xs text-gray-400">{photoFiles.length}/{MAX_PHOTOS}枚選択中</p>
+          <p className="mt-1.5 text-xs text-gray-400">{tn("review.photosSelected", { n: photoFiles.length, max: MAX_PHOTOS })}</p>
         )}
       </div>
 
@@ -273,10 +275,10 @@ export default function ReviewForm({ spot }: ReviewFormProps) {
         {submitting ? (
           <>
             <Loader2 className="size-4 animate-spin" />
-            送信中...
+            {t("review.submitting")}
           </>
         ) : (
-          "レビューを投稿する"
+          t("review.submit")
         )}
       </Button>
     </form>

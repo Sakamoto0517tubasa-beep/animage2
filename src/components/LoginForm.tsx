@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/";
+  const t = useT();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +28,7 @@ export default function LoginForm() {
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
-      setError("メールアドレスまたはパスワードが正しくありません");
+      setError(t("auth.loginError"));
       setLoading(false);
       return;
     }
@@ -42,22 +44,22 @@ export default function LoginForm() {
         <h1 className="font-cinzel text-3xl font-bold tracking-widest text-white">
           <span className="opacity-80">A</span>NIM<span className="opacity-80">A</span>GE
         </h1>
-        <p className="mt-2 text-sm text-white/70">アニメ聖地巡礼プラットフォーム</p>
+        <p className="mt-2 text-sm text-white/70">{t("auth.tagline")}</p>
       </div>
 
       {/* フォームカード */}
       <div className="flex flex-1 flex-col bg-gray-50 px-4 py-8">
         <div className="mx-auto w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900">ログイン</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t("header.login")}</h2>
           <p className="mt-1 text-sm text-gray-500">
-            アカウントにサインインして、レビューやお気に入りを管理しよう
+            {t("auth.loginSubtitle")}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {/* メールアドレス */}
             <div>
               <label htmlFor="email" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                メールアドレス
+                {t("auth.email")}
               </label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -77,7 +79,7 @@ export default function LoginForm() {
             {/* パスワード */}
             <div>
               <label htmlFor="password" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                パスワード
+                {t("auth.password")}
               </label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -115,22 +117,22 @@ export default function LoginForm() {
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  ログイン中...
+                  {t("auth.loggingIn")}
                 </>
               ) : (
-                "ログイン"
+                t("header.login")
               )}
             </button>
           </form>
 
           <div className="mt-6 border-t border-gray-100 pt-5 text-center">
             <p className="text-sm text-gray-500">
-              アカウントをお持ちでない方は{" "}
+              {t("auth.noAccount")}{" "}
               <Link
                 href={`/auth/register${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
                 className="font-semibold text-[#E53935]"
               >
-                新規登録
+                {t("header.register")}
               </Link>
             </p>
           </div>
