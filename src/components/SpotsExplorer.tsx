@@ -4,12 +4,14 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
 import SpotsMap from "@/components/SpotsMap";
 import type { SpotWithStats } from "@/types/supabase";
+import { useLang } from "@/components/i18n/LanguageProvider";
 
 type SpotsExplorerProps = {
   query?: string;
 };
 
 export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
+  const { t, tn } = useLang();
   const [allSpots, setAllSpots] = useState<SpotWithStats[]>([]);
   const [searchResults, setSearchResults] = useState<SpotWithStats[] | null>(null); // nullなら全件
   const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="聖地・アニメ名で検索..."
+            placeholder={t("search.placeholder")}
             className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-4 text-sm shadow-md focus:border-[#E53935] focus:outline-none"
           />
           {searchText && (
@@ -141,7 +143,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
             }`}
           >
             <span className="max-w-24 truncate">
-              {selectedAnime ?? "アニメ"}
+              {selectedAnime ?? t("filter.anime")}
             </span>
             <ChevronDown className="size-3.5 shrink-0" />
           </button>
@@ -153,7 +155,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                   type="text"
                   value={animeSearch}
                   onChange={(e) => setAnimeSearch(e.target.value)}
-                  placeholder="アニメ名で絞り込む"
+                  placeholder={t("filter.filterByAnime")}
                   className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs focus:outline-none focus:border-[#E53935]"
                   autoFocus
                 />
@@ -168,7 +170,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                 }}
                 className="w-full px-4 py-2.5 text-left text-sm text-gray-500 hover:bg-gray-50"
               >
-                すべて
+                {t("filter.all")}
               </button>
               {animeTitles.map((title) => (
                 <button
@@ -207,7 +209,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                 : "border-gray-200 bg-white text-gray-700"
             }`}
           >
-            <span>{selectedCity ?? "エリア"}</span>
+            <span>{selectedCity ?? t("filter.area")}</span>
             <ChevronDown className="size-3.5 shrink-0" />
           </button>
 
@@ -221,7 +223,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
                 }}
                 className="w-full px-4 py-2.5 text-left text-sm text-gray-500 hover:bg-gray-50"
               >
-                すべて
+                {t("filter.all")}
               </button>
               {cities.map((city) => (
                 <button
@@ -251,10 +253,10 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
           {loading && allSpots.length === 0 ? (
             <span className="flex items-center gap-1.5">
               <span className="size-1.5 animate-pulse rounded-full bg-[#E53935]" />
-              聖地を読み込み中…
+              {t("list.loadingSpots")}
             </span>
           ) : (
-            `${filteredSpots.length} 件`
+            tn("list.count", { n: filteredSpots.length })
           )}
         </div>
         {hasActiveFilter && (
@@ -264,7 +266,7 @@ export default function SpotsExplorer({ query = "" }: SpotsExplorerProps) {
             className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs text-gray-500 shadow-sm hover:text-red-500"
           >
             <X className="size-3" />
-            クリア
+            {t("filter.clear")}
           </button>
         )}
       </div>

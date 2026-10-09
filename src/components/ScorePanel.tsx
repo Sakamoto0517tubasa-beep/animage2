@@ -1,6 +1,9 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import type { SpotScores } from "@/lib/reviews";
 import { getScoreBadgeColor } from "@/lib/home-utils";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 type ScorePanelProps = {
   scores: SpotScores;
@@ -8,24 +11,25 @@ type ScorePanelProps = {
   className?: string;
 };
 
-const SCORE_ITEMS: { key: keyof SpotScores; label: string }[] = [
-  { key: "reenactment",   label: "再現度" },
-  { key: "accessibility", label: "アクセス" },
-  { key: "photo",         label: "写真映え" },
-  { key: "crowding",      label: "混雑度" },
-  { key: "overall",       label: "総合" },
+const SCORE_ITEMS: { key: keyof SpotScores; labelKey: string }[] = [
+  { key: "reenactment",   labelKey: "score.reenactment" },
+  { key: "accessibility", labelKey: "score.accessibility" },
+  { key: "photo",         labelKey: "score.photo" },
+  { key: "crowding",      labelKey: "score.crowding" },
+  { key: "overall",       labelKey: "score.overall" },
 ];
 
 // ── レーダーチャート（SVG, 4軸 ダイヤモンド配置） ──
 function RadarChart({ scores }: { scores: SpotScores }) {
+  const t = useT();
   const cx = 70, cy = 70, r = 52;
 
   // 各軸の角度（上=再現度、右=アクセス、下=写真映え、左=混雑度）
   const axes = [
-    { key: "reenactment"   as keyof SpotScores, label: "再現度",   angle: -Math.PI / 2 },
-    { key: "accessibility" as keyof SpotScores, label: "アクセス", angle: 0 },
-    { key: "photo"         as keyof SpotScores, label: "写真映え", angle: Math.PI / 2 },
-    { key: "crowding"      as keyof SpotScores, label: "混雑度",   angle: Math.PI },
+    { key: "reenactment"   as keyof SpotScores, label: t("score.reenactment"),   angle: -Math.PI / 2 },
+    { key: "accessibility" as keyof SpotScores, label: t("score.accessibility"), angle: 0 },
+    { key: "photo"         as keyof SpotScores, label: t("score.photo"),         angle: Math.PI / 2 },
+    { key: "crowding"      as keyof SpotScores, label: t("score.crowding"),       angle: Math.PI },
   ];
 
   // データポリゴン
@@ -114,17 +118,18 @@ function ScoreBar({ value, color }: { value: number | null; color: string }) {
 }
 
 export default function ScorePanel({ scores, reviewCount, className }: ScorePanelProps) {
+  const t = useT();
   if (reviewCount === 0) {
     return (
       <div className={cn("rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-8 text-center", className)}>
-        <p className="text-sm font-medium text-gray-600">まだレビューがありません - 最初にレビューを書こう！</p>
+        <p className="text-sm font-medium text-gray-600">{t("panel.noReviews")}</p>
       </div>
     );
   }
 
   return (
     <div className={cn("rounded-2xl border border-gray-100 bg-white p-4 shadow-sm", className)}>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">スコア詳細</p>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">{t("panel.scoreDetails")}</p>
 
       <div className="flex items-center gap-4">
         {/* レーダーチャート */}
@@ -132,7 +137,7 @@ export default function ScorePanel({ scores, reviewCount, className }: ScorePane
           <RadarChart scores={scores} />
           {scores.overall !== null && (
             <div className="mt-2 flex flex-col items-center rounded-xl bg-gray-50 px-3 py-1.5">
-              <span className="text-[10px] font-semibold text-gray-400">総合</span>
+              <span className="text-[10px] font-semibold text-gray-400">{t("score.overall")}</span>
               <span className="text-xl font-extrabold tabular-nums" style={{ color: getScoreBadgeColor(scores.overall) }}>
                 {scores.overall.toFixed(1)}
               </span>
@@ -142,13 +147,13 @@ export default function ScorePanel({ scores, reviewCount, className }: ScorePane
 
         {/* スコアバー */}
         <div className="flex-1 space-y-2.5">
-          {SCORE_ITEMS.map(({ key, label }) => {
+          {SCORE_ITEMS.map(({ key, labelKey }) => {
             const value = scores[key];
             const color = getScoreBadgeColor(value);
             return (
               <div key={key}>
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-500">{label}</span>
+                  <span className="text-[11px] text-gray-500">{t(labelKey)}</span>
                   <span className="text-xs font-bold tabular-nums" style={{ color }}>
                     {value !== null ? value.toFixed(1) : "—"}
                   </span>

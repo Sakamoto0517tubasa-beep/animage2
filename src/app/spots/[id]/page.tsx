@@ -13,6 +13,7 @@ import ScoreBadge from "@/components/ScoreBadge";
 import ScorePanel from "@/components/ScorePanel";
 import SpotEmbedMapLazy from "@/components/SpotEmbedMapLazy";
 import PilgrimageManners from "@/components/PilgrimageManners";
+import T from "@/components/i18n/T";
 import { deriveSpotCautionKey } from "@/lib/spot-caution";
 import SpotImagePanel from "@/components/SpotImagePanel";
 import RelatedSpots from "@/components/RelatedSpots";
@@ -142,7 +143,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
           {spot.train_minutes != null && (
             <p className="flex items-center gap-1.5 text-sm text-gray-500">
               <Train className="size-4 shrink-0 text-gray-400" />
-              最寄り駅から電車で約{spot.train_minutes}分
+              <T k="spot.trainAccess" n={spot.train_minutes} />
             </p>
           )}
         </div>
@@ -152,7 +153,7 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
           <div className="flex shrink-0 flex-col items-center gap-0.5">
             <ScoreBadge score={scores.overall} reviewCount={reviewCount} size="lg" />
             {reviewCount > 0 && (
-              <span className="text-[10px] text-gray-400">{reviewCount}件</span>
+              <span className="text-[10px] text-gray-400"><T k="spot.reviewsCount" n={reviewCount} /></span>
             )}
           </div>
           <Button
@@ -162,13 +163,13 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
           >
             <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
               <MapPin className="size-4" />
-              ルート
+              <T k="spot.route" />
             </a>
           </Button>
           <Button asChild className="flex-1 rounded-xl bg-[#E53935] hover:bg-[#D32F2F]">
             <Link href={`/spots/${spot.id}/review/new`}>
               <PenLine className="size-4" />
-              レビュー
+              <T k="spot.review" />
             </Link>
           </Button>
           <VisitedButton spotId={spot.id} className="shrink-0" />
@@ -200,8 +201,8 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       {/* ── 写真 ── */}
       <section className="px-4 mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900">写真</h3>
-          <span className="text-xs text-gray-400">{photos.length}枚</span>
+          <h3 className="text-base font-bold text-gray-900"><T k="spot.photos" /></h3>
+          <span className="text-xs text-gray-400"><T k="spot.photosCount" n={photos.length} /></span>
         </div>
         <PhotoGrid photos={photos} />
       </section>
@@ -215,18 +216,18 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
       {/* ── レビュー ── */}
       <section className="px-4 mt-8 pb-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900">レビュー</h3>
-          <span className="text-xs text-gray-400">{reviewCount}件</span>
+          <h3 className="text-base font-bold text-gray-900"><T k="spot.reviews" /></h3>
+          <span className="text-xs text-gray-400"><T k="spot.reviewsCount" n={reviewCount} /></span>
         </div>
 
         <div className="space-y-3">
           {reviewCount === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-200 py-10 text-center">
               <p className="text-sm text-gray-500">
-                まだレビューがありません
+                <T k="spot.noReviews" />
               </p>
               <Button asChild className="mt-4 bg-[#E53935] hover:bg-[#D32F2F]">
-                <Link href={`/spots/${spot.id}/review/new`}>最初にレビューを書く</Link>
+                <Link href={`/spots/${spot.id}/review/new`}><T k="spot.writeFirst" /></Link>
               </Button>
             </div>
           ) : (

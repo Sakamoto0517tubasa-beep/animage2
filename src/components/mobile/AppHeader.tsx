@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import LogoWordmark from "@/components/LogoWordmark";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 type HeaderConfig = {
-  title: string;
+  titleKey?: string; // 未指定ならロゴ表示
   backHref?: string;
 };
 
@@ -14,48 +15,49 @@ function getHeaderConfig(pathname: string): HeaderConfig | null {
   if (pathname === "/" || pathname === "/spots") return null;
 
   if (pathname === "/spots/map") {
-    return { title: "Map", backHref: "/spots" };
+    return { titleKey: "nav.map", backHref: "/spots" };
   }
 
   const reviewMatch = pathname.match(/^\/spots\/([^/]+)\/review\/new$/);
   if (reviewMatch) {
-    return { title: "レビューを書く", backHref: `/spots/${reviewMatch[1]}` };
+    return { titleKey: "header.writeReview", backHref: `/spots/${reviewMatch[1]}` };
   }
 
   const spotMatch = pathname.match(/^\/spots\/([^/]+)$/);
   if (spotMatch && spotMatch[1] !== "map") {
-    return { title: "スポット詳細", backHref: "/spots" };
+    return { titleKey: "header.spotDetail", backHref: "/spots" };
   }
 
   if (pathname === "/auth/login") {
-    return { title: "ログイン", backHref: "/" };
+    return { titleKey: "header.login", backHref: "/" };
   }
 
   if (pathname === "/auth/register") {
-    return { title: "新規登録", backHref: "/" };
+    return { titleKey: "header.register", backHref: "/" };
   }
 
   if (pathname === "/profile") {
-    return { title: "マイページ", backHref: "/" };
+    return { titleKey: "nav.profile", backHref: "/" };
   }
 
   if (pathname === "/notifications") {
-    return { title: "通知", backHref: "/" };
+    return { titleKey: "header.notifications", backHref: "/" };
   }
 
   if (pathname === "/compare") {
-    return { title: "スポット比較", backHref: "/" };
+    return { titleKey: "header.compare", backHref: "/" };
   }
 
   if (pathname === "/ranking") {
-    return { title: "ランキング", backHref: "/" };
+    return { titleKey: "nav.ranking", backHref: "/" };
   }
 
-  return { title: "Animeji", backHref: "/" };
+  return { backHref: "/" }; // ロゴ
 }
 
 export default function AppHeader() {
   const pathname = usePathname();
+  const t = useT();
   const config = getHeaderConfig(pathname);
 
   if (!config) return null;
@@ -73,10 +75,10 @@ export default function AppHeader() {
           </Link>
         )}
 
-        {config.title === "Animeji" || pathname.startsWith("/auth") ? (
+        {!config.titleKey || pathname.startsWith("/auth") ? (
           <LogoWordmark href="/" className="text-white" />
         ) : (
-          <h1 className="text-base font-semibold text-white">{config.title}</h1>
+          <h1 className="text-base font-semibold text-white">{t(config.titleKey)}</h1>
         )}
       </div>
     </header>

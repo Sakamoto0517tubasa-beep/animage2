@@ -1,18 +1,20 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { type Locale, isLocale, translate } from "@/lib/i18n/dictionaries";
+import { type Locale, isLocale, translate, translateWith } from "@/lib/i18n/dictionaries";
 
 type LangContextValue = {
   locale: Locale;
   setLocale: (l: Locale) => void;
   t: (key: string) => string;
+  tn: (key: string, params: Record<string, string | number>) => string;
 };
 
 const LangContext = createContext<LangContextValue>({
   locale: "ja",
   setLocale: () => {},
   t: (k) => translate("ja", k),
+  tn: (k, p) => translateWith("ja", k, p),
 });
 
 const STORAGE_KEY = "animeji-locale";
@@ -46,9 +48,13 @@ export default function LanguageProvider({ children }: { children: React.ReactNo
   }, []);
 
   const t = useCallback((key: string) => translate(locale, key), [locale]);
+  const tn = useCallback(
+    (key: string, params: Record<string, string | number>) => translateWith(locale, key, params),
+    [locale],
+  );
 
   return (
-    <LangContext.Provider value={{ locale, setLocale, t }}>
+    <LangContext.Provider value={{ locale, setLocale, t, tn }}>
       {children}
     </LangContext.Provider>
   );

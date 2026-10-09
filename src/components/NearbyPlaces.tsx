@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Star, MapPin, Utensils, Landmark, Coffee, Hotel, Navigation, ExternalLink, ShoppingBag } from "lucide-react";
 import type { NearbyPlace } from "@/app/api/nearby/route";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 // ── 距離計算（m） ──
 function calcDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -28,7 +29,8 @@ function PriceLevel({ level }: { level: number | null }) {
 
 // ── 星評価 ──
 function RatingStars({ rating, count }: { rating: number | null; count: number }) {
-  if (rating == null) return <span className="text-[10px] text-gray-400">評価なし</span>;
+  const t = useT();
+  if (rating == null) return <span className="text-[10px] text-gray-400">{t("nearby.noRating")}</span>;
   return (
     <span className="flex items-center gap-0.5">
       <Star className="size-2.5 fill-amber-400 text-amber-400" />
@@ -44,32 +46,32 @@ function photoUrl(ref: string): string {
 }
 
 // ── カテゴリ定義 ──
-type Category = { key: string; label: string; icon: React.ReactNode; color: string };
+type Category = { key: string; labelKey: string; icon: React.ReactNode; color: string };
 const CATEGORIES: Category[] = [
-  { key: "food",        label: "飲食店",   icon: <Utensils    className="size-3.5" />, color: "text-orange-500" },
-  { key: "cafe",        label: "カフェ",   icon: <Coffee      className="size-3.5" />, color: "text-amber-600" },
-  { key: "convenience", label: "コンビニ", icon: <ShoppingBag className="size-3.5" />, color: "text-green-600" },
-  { key: "lodging",     label: "宿泊",     icon: <Hotel       className="size-3.5" />, color: "text-rose-500" },
-  { key: "sightseeing", label: "観光",     icon: <Landmark    className="size-3.5" />, color: "text-blue-500" },
+  { key: "food",        labelKey: "nearby.food",        icon: <Utensils    className="size-3.5" />, color: "text-orange-500" },
+  { key: "cafe",        labelKey: "nearby.cafe",        icon: <Coffee      className="size-3.5" />, color: "text-amber-600" },
+  { key: "convenience", labelKey: "nearby.convenience", icon: <ShoppingBag className="size-3.5" />, color: "text-green-600" },
+  { key: "lodging",     labelKey: "nearby.lodging",     icon: <Hotel       className="size-3.5" />, color: "text-rose-500" },
+  { key: "sightseeing", labelKey: "nearby.sightseeing", icon: <Landmark    className="size-3.5" />, color: "text-blue-500" },
 ];
 
 // ── 予約・送客リンク（将来ここをアフィリエイトリンクに差し替え）──
-function bookingUrl(place: NearbyPlace, category: string): { href: string; label: string } | null {
+function bookingUrl(place: NearbyPlace, category: string): { href: string; labelKey: string } | null {
   // ホットペッパー等が正式な予約/詳細URLを持つ場合はそれを最優先（キーワード検索より確実）
   if (place.booking_url) {
-    return { href: place.booking_url, label: "予約・詳細" };
+    return { href: place.booking_url, labelKey: "nearby.reserve" };
   }
   if (category === "lodging") {
     return {
       href: `https://www.booking.com/searchresults.ja.html?ss=${encodeURIComponent(place.name)}`,
-      label: "宿を予約",
+      labelKey: "nearby.book",
     };
   }
   if (category === "food" || category === "cafe") {
     // 飲食 → 食べログのキーワード検索（※アフィリエイトIDは後で付与）
     return {
       href: `https://tabelog.com/rstLst/?sw=${encodeURIComponent(place.name)}`,
-      label: "予約・口コミ",
+      labelKey: "nearby.reviewLink",
     };
   }
   return null;
@@ -100,6 +102,7 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
 
 // ── プレイスカード（横長） ──
 function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; spotLat: number; spotLng: number; category: string }) {
+  const t = useT();
   const dist = calcDistance(spotLat, spotLng, place.lat, place.lng);
   const distLabel = dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(1)}km`;
   const isHotpepper = place.source === "hotpepper";
@@ -155,7 +158,7 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
             <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
               place.open_now ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
             }`}>
-              {place.open_now ? "営業中" : "営業時間外"}
+              {place.open_now ? t("nearby.open") : t("nearby.closed")}
             </span>
           )}
         </div>
@@ -169,7 +172,7 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
             className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200"
           >
             <Navigation className="size-3" />
-            ルート
+            {t("spot.route")}
           </a>
           {booking ? (
             <a
@@ -179,7 +182,7 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
               className="flex items-center gap-1 rounded-lg bg-[#E53935] px-3 py-1.5 text-[11px] font-bold text-white hover:bg-[#D32F2F]"
             >
               <ExternalLink className="size-3" />
-              {booking.label}
+              {t(booking.labelKey)}
             </a>
           ) : (
             <a
@@ -189,7 +192,7 @@ function PlaceCard({ place, spotLat, spotLng, category }: { place: NearbyPlace; 
               className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200"
             >
               <ExternalLink className="size-3" />
-              Googleで見る
+              {t("nearby.googleView")}
             </a>
           )}
         </div>
@@ -218,6 +221,7 @@ function Skeleton() {
 
 // ── メイン ──
 export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number }) {
+  const t = useT();
   const [activeCategory, setActiveCategory] = useState("food");
   const [cache, setCache]     = useState<Record<string, NearbyPlace[]>>({});
   const [loading, setLoading] = useState(false);
@@ -251,8 +255,8 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
     <section className="mt-8 px-4">
       {/* ヘッダー */}
       <div className="mb-3">
-        <h3 className="text-base font-bold text-gray-900">この聖地のまわりで</h3>
-        <p className="text-[11px] text-gray-400">食べる・泊まる・立ち寄るスポット</p>
+        <h3 className="text-base font-bold text-gray-900">{t("nearby.title")}</h3>
+        <p className="text-[11px] text-gray-400">{t("nearby.subtitle")}</p>
       </div>
 
       {/* カテゴリタブ */}
@@ -270,7 +274,7 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
             <span className={activeCategory === cat.key ? "text-white" : cat.color}>
               {cat.icon}
             </span>
-            {cat.label}
+            {t(cat.labelKey)}
           </button>
         ))}
       </div>
@@ -280,7 +284,7 @@ export default function NearbyPlaces({ lat, lng }: { lat: number; lng: number })
         <Skeleton />
       ) : places.length === 0 ? (
         <div className="flex h-28 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white">
-          <p className="text-sm text-gray-400">周辺に該当する施設が見つかりません</p>
+          <p className="text-sm text-gray-400">{t("nearby.empty")}</p>
         </div>
       ) : (
         <div ref={scrollRef} className="flex flex-col gap-2">
