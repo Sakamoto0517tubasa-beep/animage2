@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/components/i18n/LanguageProvider";
 import Image from "next/image";
 import { Camera, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { Photo } from "@/types/supabase";
@@ -15,6 +16,7 @@ function Lightbox({
   index: number;
   onClose: () => void;
 }) {
+  const t = useT();
   const [current, setCurrent] = useState(index);
   const photo = photos[current];
 
@@ -36,7 +38,7 @@ function Lightbox({
       <button
         onClick={onClose}
         className="absolute right-4 top-safe-top mt-4 flex size-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm"
-        aria-label="閉じる"
+        aria-label={t("photo.close")}
       >
         <X className="size-5" />
       </button>
@@ -51,7 +53,7 @@ function Lightbox({
         <button
           onClick={prev}
           className="absolute left-2 flex size-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm"
-          aria-label="前の写真"
+          aria-label={t("photo.prev")}
         >
           <ChevronLeft className="size-5" />
         </button>
@@ -75,7 +77,7 @@ function Lightbox({
         <button
           onClick={next}
           className="absolute right-2 flex size-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm"
-          aria-label="次の写真"
+          aria-label={t("photo.next")}
         >
           <ChevronRight className="size-5" />
         </button>
@@ -86,13 +88,14 @@ function Lightbox({
 
 // ── グリッド ──
 export default function PhotoGrid({ photos }: { photos: Photo[] }) {
+  const t = useT();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (photos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-12 text-center">
         <Camera className="size-8 text-gray-300" />
-        <p className="mt-3 text-sm text-gray-500">まだ写真がありません - 最初に投稿しよう！</p>
+        <p className="mt-3 text-sm text-gray-500">{t("photo.empty")}</p>
       </div>
     );
   }
