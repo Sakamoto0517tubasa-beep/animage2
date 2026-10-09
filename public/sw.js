@@ -1,5 +1,5 @@
-// Animeji Service Worker v3
-const CACHE_VERSION = "animeji-v1";
+// Animeji Service Worker v4
+const CACHE_VERSION = "animeji-v2";
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const IMAGE_CACHE   = `${CACHE_VERSION}-images`;
 const PAGE_CACHE    = `${CACHE_VERSION}-pages`;
@@ -72,9 +72,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ページ: Stale-While-Revalidate
+  // ページ: ネットワーク優先（常に最新を配信。失敗時のみキャッシュ→オフライン）
+  // ※ Stale-While-Revalidate だと古いHTML（＝古いJSチャンク参照）を配信し続け、
+  //   デプロイした改善がユーザーに届かないため network-first にする。
   if (request.mode === "navigate" || request.headers.get("accept")?.includes("text/html")) {
-    event.respondWith(staleWhileRevalidate(request, PAGE_CACHE));
+    event.respondWith(networkFirstPage(request));
     return;
   }
 
@@ -138,29 +140,18 @@ async function networkFirst(request) {
   }
 }
 
-// ── Stale-While-Revalidate（ページ） ──
-async function staleWhileRevalidate(request, cacheName = PAGE_CACHE) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-
-  const networkPromise = fetch(request)
-    .then((response) => {
-      if (response.ok) cache.put(request, response.clone());
-      return response;
-    })
-    .catch(() => null);
-
-  if (cached) {
-    // キャッシュがあればすぐ返しつつバックグラウンドで更新
-    networkPromise; // fire and forget
-    return cached;
+// ── ネットワーク優先（ページ） ──
+// 常に最新のHTMLを取得。オフライン時のみキャッシュ→/offline にフォールバック。
+async function networkFirstPage(request) {
+  const cache = await caches.open(PAGE_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const offline = await cache.match("/offline");
+    return offline ?? new Response("Offline", { status: 503 });
   }
-
-  // キャッシュなし → ネットワーク待機
-  const networkResponse = await networkPromise;
-  if (networkResponse) return networkResponse;
-
-  // オフライン → フォールバックページ
-  const offline = await cache.match("/offline");
-  return offline ?? new Response("Offline", { status: 503 });
 }
