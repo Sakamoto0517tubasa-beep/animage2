@@ -6,6 +6,7 @@ import { CheckCircle2, MapPin, Train } from "lucide-react";
 import ScoreBadge from "@/components/ScoreBadge";
 import SpotThumbnail from "@/components/SpotThumbnail";
 import { isVisited } from "@/lib/visited";
+import { useT } from "@/components/i18n/LanguageProvider";
 import type { SpotWithStats } from "@/types/supabase";
 
 type HomeSpotCardProps = {
@@ -13,6 +14,7 @@ type HomeSpotCardProps = {
 };
 
 export default function HomeSpotCard({ spot }: HomeSpotCardProps) {
+  const t = useT();
   const [visited, setVisited] = useState(false);
 
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function HomeSpotCard({ spot }: HomeSpotCardProps) {
           {spot.train_minutes != null && (
             <span className="flex shrink-0 items-center gap-0.5">
               <Train className="size-2.5" />
-              {spot.train_minutes}分
+              {spot.train_minutes}{t("unit.minSuffix")}
             </span>
           )}
         </div>

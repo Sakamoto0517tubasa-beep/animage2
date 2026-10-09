@@ -6,6 +6,7 @@ import SpotThumbnail from "@/components/SpotThumbnail";
 import { MapPin, Star, Train } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import type { SpotCard } from "@/app/api/spots/route";
+import { useLang, useT } from "@/components/i18n/LanguageProvider";
 
 type Tab = "score" | "reenactment" | "accessibility" | "photo" | "crowding" | "reviews" | "prefecture";
 
@@ -50,6 +51,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 // ── スコアバッジ ──
 function ScoreBadge({ score, label, count }: { score: number | null; label?: string; count?: number }) {
+  const { tn } = useLang();
   const color = score != null ? getScoreBadgeColor(score) : "#9CA3AF";
   return (
     <div className="flex flex-col items-center min-w-[2.75rem]">
@@ -63,7 +65,7 @@ function ScoreBadge({ score, label, count }: { score: number | null; label?: str
       {count != null ? (
         <span className="flex items-center gap-0.5 text-[9px] text-gray-400">
           <Star className="size-2.5" />
-          {count}件
+          {tn("spot.reviewsCount", { n: count })}
         </span>
       ) : label ? (
         <span className="text-[9px] text-gray-400">{label}</span>
@@ -79,6 +81,7 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
   scoreKey: keyof Pick<SpotCard, "overall_score" | "score_reenactment" | "score_accessibility" | "score_photo" | "score_crowding">;
   scoreLabel?: string;
 }) {
+  const t = useT();
   const score = spot[scoreKey] as number | null;
   return (
     <Link
@@ -94,7 +97,7 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
         <p className="truncate text-sm font-bold text-gray-900">{spot.location_name}</p>
         <div className="mt-0.5 flex items-center gap-2 text-[10px] text-gray-400">
           {spot.city && <span className="flex items-center gap-0.5"><MapPin className="size-2.5" />{spot.city}</span>}
-          {spot.train_minutes != null && <span className="flex items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}分</span>}
+          {spot.train_minutes != null && <span className="flex items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}{t("unit.minSuffix")}</span>}
         </div>
       </div>
       <ScoreBadge score={score} label={scoreLabel} count={scoreKey === "overall_score" ? spot.review_count : undefined} />
@@ -104,6 +107,7 @@ function SpotRow({ spot, rank, scoreKey, scoreLabel }: {
 
 // ── 都道府県ランキング行 ──
 function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
+  const t = useT();
   const color = pref.avgScore != null ? getScoreBadgeColor(pref.avgScore) : "#9CA3AF";
   return (
     <Link
@@ -115,8 +119,8 @@ function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
         {pref.topSpot && <SpotThumbnail lat={pref.topSpot.lat} lng={pref.topSpot.lng} alt={pref.city} fallbackUrl={pref.topSpot.thumbnail_fallback_url} className="object-cover" sizes="48px" />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-gray-900">{pref.city}</p>
-        <p className="text-[11px] text-gray-400">{pref.count.toLocaleString()}スポット</p>
+        <p className="truncate text-sm font-bold text-gray-900">{pref.city === "その他" ? t("rank.other") : pref.city}</p>
+        <p className="text-[11px] text-gray-400">{pref.count.toLocaleString()}{t("home.spotCountSuffix")}</p>
       </div>
       <div className="flex flex-col items-center">
         {pref.avgScore != null ? (
@@ -126,7 +130,7 @@ function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
         ) : (
           <span className="text-sm text-gray-300">—</span>
         )}
-        <span className="text-[9px] text-gray-400">平均</span>
+        <span className="text-[9px] text-gray-400">{t("rank.avg")}</span>
       </div>
     </Link>
   );
@@ -135,23 +139,24 @@ function PrefRow({ pref, rank }: { pref: PrefStats; rank: number }) {
 // ── タブ定義 ──
 type TabDef = {
   key: Tab;
-  label: string;
+  labelKey: string;
   scoreKey?: keyof Pick<SpotCard, "overall_score" | "score_reenactment" | "score_accessibility" | "score_photo" | "score_crowding">;
-  scoreLabel?: string;
+  scoreLabelKey?: string;
 };
 
 const TABS: TabDef[] = [
-  { key: "score",         label: "総合",    scoreKey: "overall_score",       scoreLabel: "総合" },
-  { key: "reenactment",   label: "再現度",  scoreKey: "score_reenactment",   scoreLabel: "再現度" },
-  { key: "accessibility", label: "アクセス", scoreKey: "score_accessibility", scoreLabel: "アクセス" },
-  { key: "photo",         label: "写真映え", scoreKey: "score_photo",         scoreLabel: "写真映え" },
-  { key: "crowding",      label: "混雑度",  scoreKey: "score_crowding",      scoreLabel: "混雑度" },
-  { key: "reviews",       label: "レビュー多" },
-  { key: "prefecture",    label: "都道府県" },
+  { key: "score",         labelKey: "score.overall",       scoreKey: "overall_score",       scoreLabelKey: "score.overall" },
+  { key: "reenactment",   labelKey: "score.reenactment",   scoreKey: "score_reenactment",   scoreLabelKey: "score.reenactment" },
+  { key: "accessibility", labelKey: "score.accessibility", scoreKey: "score_accessibility", scoreLabelKey: "score.accessibility" },
+  { key: "photo",         labelKey: "score.photo",         scoreKey: "score_photo",         scoreLabelKey: "score.photo" },
+  { key: "crowding",      labelKey: "score.crowding",      scoreKey: "score_crowding",      scoreLabelKey: "score.crowding" },
+  { key: "reviews",       labelKey: "rank.tabReviews" },
+  { key: "prefecture",    labelKey: "home.stats.pref" },
 ];
 
 // ── メイン ──
 export default function RankingClient({ embedded = false }: { embedded?: boolean }) {
+  const t = useT();
   const [tab, setTab]       = useState<Tab>("score");
   const [spots, setSpots]   = useState<SpotCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,15 +214,15 @@ export default function RankingClient({ embedded = false }: { embedded?: boolean
       {/* ヘッダー（単独ページ時のみ） */}
       {!embedded && (
         <div className="sticky top-0 z-10 border-b border-gray-100 bg-white px-4 py-3">
-          <h1 className="text-lg font-bold text-gray-900">ランキング</h1>
-          <p className="text-[11px] text-gray-400">人気の聖地スポットをチェック</p>
+          <h1 className="text-lg font-bold text-gray-900">{t("nav.ranking")}</h1>
+          <p className="text-[11px] text-gray-400">{t("rank.subtitle")}</p>
         </div>
       )}
 
       {/* スクロール可能タブ */}
       <div className={`border-b border-gray-100 bg-white ${embedded ? "" : "sticky top-[3.75rem] z-10"}`}>
         <div className="flex overflow-x-auto scrollbar-none">
-          {TABS.map(({ key, label }) => (
+          {TABS.map(({ key, labelKey }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
@@ -227,7 +232,7 @@ export default function RankingClient({ embedded = false }: { embedded?: boolean
                   : "text-gray-400"
               }`}
             >
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
@@ -253,7 +258,7 @@ export default function RankingClient({ embedded = false }: { embedded?: boolean
             {tab === "prefecture" ? (
               prefStats.map((pref, i) => <PrefRow key={pref.city} pref={pref} rank={i + 1} />)
             ) : ranking && ranking.list.length === 0 ? (
-              <p className="py-12 text-center text-sm text-gray-400">まだレビューがありません</p>
+              <p className="py-12 text-center text-sm text-gray-400">{t("spot.noReviews")}</p>
             ) : ranking ? (
               ranking.list.map((spot, i) => (
                 <SpotRow
@@ -261,7 +266,7 @@ export default function RankingClient({ embedded = false }: { embedded?: boolean
                   spot={spot}
                   rank={i + 1}
                   scoreKey={ranking.scoreKey}
-                  scoreLabel={currentTab.scoreLabel}
+                  scoreLabel={currentTab.scoreLabelKey ? t(currentTab.scoreLabelKey) : undefined}
                 />
               ))
             ) : null}
