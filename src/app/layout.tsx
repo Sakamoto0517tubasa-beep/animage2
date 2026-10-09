@@ -3,6 +3,7 @@ import { Cinzel, Geist, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import MobileShell from "@/components/mobile/MobileShell";
+import LanguageProvider from "@/components/i18n/LanguageProvider";
 import PWAProvider from "@/components/PWAProvider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -78,7 +79,9 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning className={cn("font-sans", geist.variable, playfair.variable, cinzel.variable)}>
       <body suppressHydrationWarning className="min-h-screen bg-gray-100 text-gray-900 antialiased">
-        <MobileShell>{children}</MobileShell>
+        <LanguageProvider>
+          <MobileShell>{children}</MobileShell>
+        </LanguageProvider>
         <PWAProvider />
         <Analytics />
       </body>

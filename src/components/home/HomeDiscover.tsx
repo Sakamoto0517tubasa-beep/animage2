@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin, Search, Star, Train, TrendingUp } from "lucide-react";
@@ -5,6 +7,7 @@ import HomeSpotCard from "@/components/home/HomeSpotCard";
 import type { SpotCard } from "@/lib/spot-cards";
 import type { AnimeEntry } from "@/lib/anime";
 import HomeBannerClient from "@/components/home/HomeBannerClient";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 // ── セクションヘッダー ──
 function SectionHeader({
@@ -16,6 +19,7 @@ function SectionHeader({
   icon: React.ReactNode;
   href: string;
 }) {
+  const t = useT();
   return (
     <div className="mb-2.5 flex items-center justify-between px-4">
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
@@ -23,7 +27,7 @@ function SectionHeader({
         {title}
       </h2>
       <Link href={href} className="flex items-center gap-0.5 text-[11px] font-semibold text-[#E53935]">
-        もっと見る <ChevronRight className="size-3" />
+        {t("home.seeMore")} <ChevronRight className="size-3" />
       </Link>
     </div>
   );
@@ -44,6 +48,7 @@ function SpotCarousel({ spots }: { spots: SpotCard[] }) {
 
 // ── アニメカルーセル ──
 function AnimeCarousel({ animeList }: { animeList: AnimeEntry[] }) {
+  const t = useT();
   const top = animeList.slice(0, 12);
   return (
     <div className="flex gap-2.5 overflow-x-auto px-4 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -72,7 +77,7 @@ function AnimeCarousel({ animeList }: { animeList: AnimeEntry[] }) {
             {/* タイトル */}
             <div className="absolute bottom-0 left-0 right-0 p-2">
               <p className="line-clamp-2 text-[10px] font-bold leading-tight text-white">{anime.title}</p>
-              <p className="mt-0.5 text-[9px] text-white/70">{anime.spotCount}スポット</p>
+              <p className="mt-0.5 text-[9px] text-white/70">{anime.spotCount}{t("home.spotCountSuffix")}</p>
             </div>
           </div>
         </Link>
@@ -94,6 +99,7 @@ export default function HomeDiscover({
   topSpots: SpotCard[];
   hotSpots: SpotCard[];
 }) {
+  const t = useT();
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* ヘッダー */}
@@ -102,7 +108,7 @@ export default function HomeDiscover({
       {/* 人気スポット */}
       <section className="mt-5">
         <SectionHeader
-          title="人気スポット"
+          title={t("home.popular")}
           icon={<TrendingUp className="size-4 text-[#E53935]" />}
           href="/spots?sort=score"
         />
@@ -112,7 +118,7 @@ export default function HomeDiscover({
       {/* レビュー注目スポット */}
       <section className="mt-6">
         <SectionHeader
-          title="注目スポット"
+          title={t("home.featured")}
           icon={<Star className="size-4 text-amber-500" />}
           href="/spots?sort=reviews"
         />
@@ -123,7 +129,7 @@ export default function HomeDiscover({
       {animeList.length > 0 && (
         <section className="mt-6">
           <SectionHeader
-            title="アニメから探す"
+            title={t("home.byAnime")}
             icon={<MapPin className="size-4 text-purple-500" />}
             href="/anime"
           />
@@ -138,16 +144,16 @@ export default function HomeDiscover({
           className="flex items-center justify-center gap-2 rounded-2xl bg-[#E53935] py-4 text-sm font-bold text-white shadow-sm shadow-red-200"
         >
           <Search className="size-4" />
-          すべての聖地を探す
+          {t("home.searchAll")}
         </Link>
       </div>
 
       {/* 統計 */}
       <div className="mx-4 mt-3 grid grid-cols-3 gap-2">
         {[
-          { icon: <MapPin className="size-4 text-[#E53935]" />, label: "聖地スポット", value: spotCount > 0 ? `${spotCount.toLocaleString()}` : "1000+" },
-          { icon: <Star className="size-4 text-amber-500" />, label: "アニメ作品", value: animeList.length > 0 ? `${animeList.length}` : "100+" },
-          { icon: <Train className="size-4 text-blue-500" />, label: "都道府県", value: "47" },
+          { icon: <MapPin className="size-4 text-[#E53935]" />, label: t("home.stats.spots"), value: spotCount > 0 ? `${spotCount.toLocaleString()}` : "1000+" },
+          { icon: <Star className="size-4 text-amber-500" />, label: t("home.stats.anime"), value: animeList.length > 0 ? `${animeList.length}` : "100+" },
+          { icon: <Train className="size-4 text-blue-500" />, label: t("home.stats.pref"), value: "47" },
         ].map(({ icon, label, value }) => (
           <div key={label} className="rounded-2xl bg-white py-3 text-center shadow-sm border border-gray-100">
             <div className="flex justify-center">{icon}</div>
