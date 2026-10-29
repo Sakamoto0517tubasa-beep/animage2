@@ -149,6 +149,17 @@ const ja: Dict = {
   "review.errSubmit": "投稿に失敗しました",
   "review.errNoSupabase": "Supabaseが設定されていません。環境変数を追加するとレビューを投稿できます。",
   "common.errRetry": "エラーが発生しました。もう一度お試しください。",
+  // マイページ
+  "profile.favorites": "お気に入り",
+  "profile.visited": "訪問済み",
+  "profile.unvisit": "訪問済みを取り消す",
+  "profile.exploreSpots": "聖地を探す",
+  "profile.noFavorites": "まだお気に入りがありません",
+  "profile.noFavoritesHint": "スポット詳細で♥をタップして保存しよう",
+  "profile.noVisited": "まだ訪問済みスポットがありません",
+  "profile.noVisitedHint": "スポット詳細で「訪問した」をタップして記録しよう",
+  "profile.noReviews": "まだレビューを投稿していません",
+  "profile.noReviewsHint": "訪れた聖地にレビューを書いてみよう",
 };
 
 const en: Dict = {
@@ -270,6 +281,16 @@ const en: Dict = {
   "review.errSubmit": "Failed to post",
   "review.errNoSupabase": "Supabase is not configured. Add environment variables to enable reviews.",
   "common.errRetry": "An error occurred. Please try again.",
+  "profile.favorites": "Favorites",
+  "profile.visited": "Visited",
+  "profile.unvisit": "Remove from visited",
+  "profile.exploreSpots": "Explore spots",
+  "profile.noFavorites": "No favorites yet",
+  "profile.noFavoritesHint": "Tap ♥ on a spot to save it",
+  "profile.noVisited": "No visited spots yet",
+  "profile.noVisitedHint": "Tap \"Visited\" on a spot to record it",
+  "profile.noReviews": "You haven't posted any reviews yet",
+  "profile.noReviewsHint": "Write a review for a spot you've visited",
 };
 
 const zhCN: Dict = {
@@ -391,6 +412,16 @@ const zhCN: Dict = {
   "review.errSubmit": "发布失败",
   "review.errNoSupabase": "未配置Supabase。添加环境变量后即可发布点评。",
   "common.errRetry": "发生错误，请重试。",
+  "profile.favorites": "收藏",
+  "profile.visited": "已访问",
+  "profile.unvisit": "取消已访问",
+  "profile.exploreSpots": "探索圣地",
+  "profile.noFavorites": "还没有收藏",
+  "profile.noFavoritesHint": "在圣地详情点♥即可收藏",
+  "profile.noVisited": "还没有已访问的圣地",
+  "profile.noVisitedHint": "在圣地详情点“已访问”即可记录",
+  "profile.noReviews": "还没有发布点评",
+  "profile.noReviewsHint": "为去过的圣地写点评吧",
 };
 
 const ko: Dict = {
@@ -512,6 +543,16 @@ const ko: Dict = {
   "review.errSubmit": "게시에 실패했습니다",
   "review.errNoSupabase": "Supabase가 설정되지 않았습니다. 환경 변수를 추가하면 리뷰를 게시할 수 있습니다.",
   "common.errRetry": "오류가 발생했습니다. 다시 시도해 주세요.",
+  "profile.favorites": "즐겨찾기",
+  "profile.visited": "방문함",
+  "profile.unvisit": "방문 취소",
+  "profile.exploreSpots": "성지 찾기",
+  "profile.noFavorites": "아직 즐겨찾기가 없습니다",
+  "profile.noFavoritesHint": "명소 상세에서 ♥를 눌러 저장하세요",
+  "profile.noVisited": "아직 방문한 명소가 없습니다",
+  "profile.noVisitedHint": "명소 상세에서 '방문함'을 눌러 기록하세요",
+  "profile.noReviews": "아직 리뷰를 작성하지 않았습니다",
+  "profile.noReviewsHint": "방문한 성지에 리뷰를 남겨보세요",
 };
 
 const es: Dict = {
@@ -633,6 +674,16 @@ const es: Dict = {
   "review.errSubmit": "Error al publicar",
   "review.errNoSupabase": "Supabase no está configurado. Añade variables de entorno para habilitar las reseñas.",
   "common.errRetry": "Ocurrió un error. Inténtalo de nuevo.",
+  "profile.favorites": "Favoritos",
+  "profile.visited": "Visitados",
+  "profile.unvisit": "Quitar de visitados",
+  "profile.exploreSpots": "Explorar lugares",
+  "profile.noFavorites": "Aún no hay favoritos",
+  "profile.noFavoritesHint": "Toca ♥ en un lugar para guardarlo",
+  "profile.noVisited": "Aún no hay lugares visitados",
+  "profile.noVisitedHint": "Toca \"Visitado\" en un lugar para registrarlo",
+  "profile.noReviews": "Aún no has publicado reseñas",
+  "profile.noReviewsHint": "Escribe una reseña de un lugar que hayas visitado",
 };
 
 export const DICTIONARIES: Record<Locale, Dict> = { ja, en, "zh-CN": zhCN, ko, es };

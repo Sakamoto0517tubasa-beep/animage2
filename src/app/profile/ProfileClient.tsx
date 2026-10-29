@@ -7,6 +7,7 @@ import { CheckCircle2, Heart, MapPin, Star, Train } from "lucide-react";
 import { getScoreBadgeColor } from "@/lib/home-utils";
 import { getVisitedIds, toggleVisited } from "@/lib/visited";
 import { getLocalFavoriteIds, toggleLocalFavorite } from "@/lib/local-favorites";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 export type FavoriteSpot = {
   id: string;
@@ -38,6 +39,7 @@ type Tab = "favorites" | "reviews" | "visited";
 
 // ── お気に入りカード ──
 function FavCard({ spot }: { spot: FavoriteSpot }) {
+  const t = useT();
   return (
     <Link
       href={`/spots/${spot.id}`}
@@ -51,7 +53,7 @@ function FavCard({ spot }: { spot: FavoriteSpot }) {
         <p className="mt-0.5 line-clamp-2 text-xs font-bold leading-snug text-gray-900">{spot.location_name}</p>
         <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
           {spot.city && <span className="flex items-center gap-0.5 truncate"><MapPin className="size-2.5 shrink-0" />{spot.city}</span>}
-          {spot.train_minutes != null && <span className="flex shrink-0 items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}分</span>}
+          {spot.train_minutes != null && <span className="flex shrink-0 items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}{t("unit.minSuffix")}</span>}
         </div>
       </div>
     </Link>
@@ -60,6 +62,7 @@ function FavCard({ spot }: { spot: FavoriteSpot }) {
 
 // ── レビューカード ──
 function ReviewCard({ review }: { review: MyReview }) {
+  const t = useT();
   const color = getScoreBadgeColor(review.score_overall);
   const date = new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "short", day: "numeric" }).format(new Date(review.created_at));
 
@@ -99,10 +102,10 @@ function ReviewCard({ review }: { review: MyReview }) {
         <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-gray-600">{review.comment}</p>
       )}
       <div className="mt-2.5 grid grid-cols-4 gap-1">
-        <Pill label="再現度" value={review.score_reenactment} />
-        <Pill label="アクセス" value={review.score_accessibility} />
-        <Pill label="写真映え" value={review.score_photo} />
-        <Pill label="混雑度" value={review.score_crowding} />
+        <Pill label={t("score.reenactment")} value={review.score_reenactment} />
+        <Pill label={t("score.accessibility")} value={review.score_accessibility} />
+        <Pill label={t("score.photo")} value={review.score_photo} />
+        <Pill label={t("score.crowding")} value={review.score_crowding} />
       </div>
     </Link>
   );
@@ -110,6 +113,7 @@ function ReviewCard({ review }: { review: MyReview }) {
 
 // ── 訪問済みカード ──
 function VisitedCard({ spot }: { spot: FavoriteSpot }) {
+  const t = useT();
 
   function handleUnvisit(e: React.MouseEvent) {
     e.preventDefault();
@@ -127,13 +131,13 @@ function VisitedCard({ spot }: { spot: FavoriteSpot }) {
         {/* 訪問済みバッジ */}
         <div className="absolute left-1.5 top-1.5 flex items-center gap-0.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[9px] font-bold text-white shadow">
           <CheckCircle2 className="size-2.5" />
-          訪問済み
+          {t("profile.visited")}
         </div>
         {/* 削除ボタン */}
         <button
           onClick={handleUnvisit}
           className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm"
-          aria-label="訪問済みを取り消す"
+          aria-label={t("profile.unvisit")}
         >
           <span className="text-[10px] font-bold leading-none">✕</span>
         </button>
@@ -143,7 +147,7 @@ function VisitedCard({ spot }: { spot: FavoriteSpot }) {
         <p className="mt-0.5 line-clamp-2 text-xs font-bold leading-snug text-gray-900">{spot.location_name}</p>
         <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
           {spot.city && <span className="flex items-center gap-0.5 truncate"><MapPin className="size-2.5 shrink-0" />{spot.city}</span>}
-          {spot.train_minutes != null && <span className="flex shrink-0 items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}分</span>}
+          {spot.train_minutes != null && <span className="flex shrink-0 items-center gap-0.5"><Train className="size-2.5" />{spot.train_minutes}{t("unit.minSuffix")}</span>}
         </div>
       </div>
     </Link>
@@ -160,6 +164,7 @@ export default function ProfileClient({
   reviews: MyReview[];
   isLoggedIn: boolean;
 }) {
+  const t = useT();
   const [tab, setTab] = useState<Tab>("favorites");
 
   // 訪問済み
@@ -259,7 +264,7 @@ export default function ProfileClient({
           }`}
         >
           <Heart className="size-3.5" />
-          お気に入り
+          {t("profile.favorites")}
           {displayFavCount > 0 && (
             <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${tab === "favorites" ? "bg-red-50 text-[#E53935]" : "bg-gray-100 text-gray-400"}`}>
               {displayFavCount}
@@ -273,7 +278,7 @@ export default function ProfileClient({
           }`}
         >
           <CheckCircle2 className="size-3.5" />
-          訪問済み
+          {t("profile.visited")}
           {visitedIds.length > 0 && (
             <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${tab === "visited" ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"}`}>
               {visitedIds.length}
@@ -287,7 +292,7 @@ export default function ProfileClient({
           }`}
         >
           <Star className="size-3.5" />
-          レビュー
+          {t("spot.reviews")}
           {reviews.length > 0 && (
             <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${tab === "reviews" ? "bg-red-50 text-[#E53935]" : "bg-gray-100 text-gray-400"}`}>
               {reviews.length}
@@ -310,10 +315,10 @@ export default function ProfileClient({
               <div className="flex size-16 items-center justify-center rounded-full bg-gray-100">
                 <Heart className="size-7 text-gray-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">まだお気に入りがありません</p>
-              <p className="text-xs text-gray-400">スポット詳細で♥をタップして保存しよう</p>
+              <p className="text-sm font-medium text-gray-500">{t("profile.noFavorites")}</p>
+              <p className="text-xs text-gray-400">{t("profile.noFavoritesHint")}</p>
               <Link href="/spots" className="mt-1 rounded-full bg-[#E53935] px-5 py-2 text-sm font-semibold text-white">
-                聖地を探す
+                {t("profile.exploreSpots")}
               </Link>
             </div>
           ) : (
@@ -328,10 +333,10 @@ export default function ProfileClient({
               <div className="flex size-16 items-center justify-center rounded-full bg-gray-100">
                 <CheckCircle2 className="size-7 text-gray-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">まだ訪問済みスポットがありません</p>
-              <p className="text-xs text-gray-400">スポット詳細で「訪問した」をタップして記録しよう</p>
+              <p className="text-sm font-medium text-gray-500">{t("profile.noVisited")}</p>
+              <p className="text-xs text-gray-400">{t("profile.noVisitedHint")}</p>
               <Link href="/spots" className="mt-1 rounded-full bg-[#E53935] px-5 py-2 text-sm font-semibold text-white">
-                聖地を探す
+                {t("profile.exploreSpots")}
               </Link>
             </div>
           ) : visitedLoading ? (
@@ -352,10 +357,10 @@ export default function ProfileClient({
               <div className="flex size-16 items-center justify-center rounded-full bg-gray-100">
                 <Star className="size-7 text-gray-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">まだレビューを投稿していません</p>
-              <p className="text-xs text-gray-400">訪れた聖地にレビューを書いてみよう</p>
+              <p className="text-sm font-medium text-gray-500">{t("profile.noReviews")}</p>
+              <p className="text-xs text-gray-400">{t("profile.noReviewsHint")}</p>
               <Link href="/spots" className="mt-1 rounded-full bg-[#E53935] px-5 py-2 text-sm font-semibold text-white">
-                聖地を探す
+                {t("profile.exploreSpots")}
               </Link>
             </div>
           ) : (
